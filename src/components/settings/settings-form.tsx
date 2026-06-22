@@ -47,8 +47,18 @@ export function SettingsForm({ profile }: { profile: Profile }) {
             required
           />
         </Field>
-        <Field label="E-mailadres" hint="Wordt beheerd via je inlogaccount.">
-          <Input value={profile.email} disabled />
+        <Field
+          label="E-mailadres"
+          hint="Bij wijziging ontvang je een bevestigingsmail."
+          error={state.fieldErrors?.email?.[0]}
+        >
+          <Input
+            name="email"
+            type="email"
+            defaultValue={profile.email}
+            autoComplete="email"
+            required
+          />
         </Field>
       </div>
 

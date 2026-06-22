@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Goal,
   LayoutDashboard,
-  LogOut,
   Menu,
   WalletCards,
   X,
@@ -15,7 +14,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { logoutAction } from "@/actions/auth";
 import { HouseholdRail } from "@/components/app/household-rail";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -148,15 +146,6 @@ export function AppShell({
               {viewer.profile.email}
             </p>
           </div>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="grid size-8 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-              aria-label="Uitloggen"
-            >
-              <LogOut className="size-4" />
-            </button>
-          </form>
         </div>
       </div>
     </aside>
@@ -168,6 +157,7 @@ export function AppShell({
         households={viewer.households}
         activeHouseholdId={viewer.household?.id}
         returnTo={pathname}
+        profile={viewer.profile}
       />
       {navigationSidebar}
     </div>

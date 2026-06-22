@@ -215,6 +215,10 @@ export interface Database {
         Args: { household_name: string; household_currency: string };
         Returns: string;
       };
+      delete_own_account: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
       join_household: {
         Args: { household_code: string };
         Returns: string;

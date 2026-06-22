@@ -9,7 +9,11 @@ export async function GET(request: Request) {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/onboarding";
+  const requestedNext = searchParams.get("next") ?? "/onboarding";
+  const next =
+    requestedNext.startsWith("/") && !requestedNext.startsWith("//")
+      ? requestedNext
+      : "/onboarding";
 
   if (!isSupabaseConfigured) {
     return NextResponse.redirect(`${origin}/login`);

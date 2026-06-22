@@ -9,7 +9,12 @@ import { isDemoMode } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Inloggen" };
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ account?: string }>;
+}) {
+  const params = await searchParams;
   const viewer = await getViewer();
   if (viewer) {
     redirect(viewer.household ? "/dashboard" : "/onboarding");
@@ -25,6 +30,14 @@ export default async function LoginPage() {
           Log in om verder te gaan naar Nestly.
         </p>
       </div>
+      {params.account === "deleted" && (
+        <div
+          role="status"
+          className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-700"
+        >
+          Je account is definitief verwijderd.
+        </div>
+      )}
       <AuthForm mode="login" />
       {isDemoMode && (
         <>

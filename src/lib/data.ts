@@ -54,6 +54,9 @@ async function getDemoViewer(): Promise<Viewer | null> {
       fullName:
         cookieStore.get("nestly_demo_name")?.value ||
         demoViewer.profile.fullName,
+      email:
+        cookieStore.get("nestly_demo_email")?.value ||
+        demoViewer.profile.email,
       accentColor:
         cookieStore.get("nestly_demo_accent")?.value ||
         demoViewer.profile.accentColor,

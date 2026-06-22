@@ -14,6 +14,7 @@ import { useActionState, useState } from "react";
 
 import { createAdditionalHouseholdAction } from "@/actions/household";
 import { switchHouseholdAction } from "@/actions/household-switcher";
+import { AccountSettingsModal } from "@/components/settings/account-settings-modal";
 import { Button } from "@/components/ui/button";
 import {
   ActionMessage,
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/form-controls";
 import { Modal } from "@/components/ui/modal";
 import { cn, formatHouseholdRole } from "@/lib/utils";
-import type { ActionState, Household } from "@/types/app";
+import type { ActionState, Household, Profile } from "@/types/app";
 
 const initialState: ActionState = {};
 
@@ -88,17 +89,19 @@ export function HouseholdRail({
   households,
   activeHouseholdId,
   returnTo,
+  profile,
 }: {
   households: Household[];
   activeHouseholdId?: string;
   returnTo: string;
+  profile: Profile;
 }) {
   const [createOpen, setCreateOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [createState, createAction] = useActionState(
     createAdditionalHouseholdAction,
     initialState,
   );
-  const settingsActive = returnTo === "/settings";
 
   return (
     <>
@@ -185,20 +188,15 @@ export function HouseholdRail({
 
         <div className="my-2 h-px w-8 bg-white/10" />
 
-        <Link
-          href="/settings"
-          className={cn(
-            "group relative grid size-10 place-items-center rounded-[20px] outline-none ring-offset-2 ring-offset-[#17211f] transition-all hover:rounded-2xl hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white",
-            settingsActive
-              ? "rounded-2xl bg-white/15 text-white"
-              : "text-white/55",
-          )}
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+          className="group relative grid size-10 place-items-center rounded-[20px] text-white/55 outline-none ring-offset-2 ring-offset-[#17211f] transition-all hover:rounded-2xl hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
           aria-label="Accountinstellingen"
-          aria-current={settingsActive ? "page" : undefined}
         >
           <Settings className="size-[18px]" />
           <Tooltip title="Accountinstellingen" subtitle="Profiel en thema" />
-        </Link>
+        </button>
       </aside>
 
       <Modal
@@ -250,6 +248,12 @@ export function HouseholdRail({
           </div>
         </form>
       </Modal>
+
+      <AccountSettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        profile={profile}
+      />
     </>
   );
 }

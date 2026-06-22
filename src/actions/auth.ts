@@ -140,6 +140,7 @@ export async function logoutAction() {
       "nestly_demo_session",
       "nestly_demo_household",
       "nestly_demo_name",
+      "nestly_demo_email",
       "nestly_demo_accent",
       "nestly_demo_locale",
       "nestly_demo_currency",

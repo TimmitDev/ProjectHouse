@@ -4,17 +4,21 @@ import { X } from "lucide-react";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
+import { cn } from "@/lib/utils";
+
 export function Modal({
   open,
   onClose,
   title,
   description,
+  size = "md",
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   description?: string;
+  size?: "md" | "xl";
   children: React.ReactNode;
 }) {
   useEffect(() => {
@@ -44,7 +48,10 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:max-w-lg sm:rounded-2xl sm:p-6"
+        className={cn(
+          "relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-2xl sm:p-6",
+          size === "xl" ? "sm:max-w-4xl" : "sm:max-w-lg",
+        )}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
