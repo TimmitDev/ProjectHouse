@@ -17,7 +17,7 @@ export function getInitials(name: string) {
 export function formatCurrency(
   value: number,
   currency = "EUR",
-  locale = "en-US",
+  locale = "nl-NL",
 ) {
   return new Intl.NumberFormat(locale, {
     style: "currency",
@@ -26,7 +26,7 @@ export function formatCurrency(
   }).format(value);
 }
 
-export function formatDate(date: string | Date, locale = "en-US") {
+export function formatDate(date: string | Date, locale = "nl-NL") {
   return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
@@ -34,7 +34,7 @@ export function formatDate(date: string | Date, locale = "en-US") {
   }).format(new Date(date));
 }
 
-export function formatLongDate(date = new Date(), locale = "en-US") {
+export function formatLongDate(date = new Date(), locale = "nl-NL") {
   return new Intl.DateTimeFormat(locale, {
     weekday: "long",
     day: "numeric",
@@ -44,4 +44,12 @@ export function formatLongDate(date = new Date(), locale = "en-US") {
 
 export function getFirstName(name: string) {
   return name.trim().split(/\s+/)[0] || name;
+}
+
+export function formatHouseholdRole(role: "owner" | "admin" | "member") {
+  return {
+    owner: "eigenaar",
+    admin: "beheerder",
+    member: "lid",
+  }[role];
 }

@@ -10,8 +10,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionState, SavingsGoal } from "@/types/app";
 
 const goalSchema = z.object({
-  name: z.string().trim().min(2, "Give your goal a name.").max(80),
-  targetAmount: z.coerce.number().positive("Target must be greater than zero."),
+  name: z.string().trim().min(2, "Geef je doel een naam.").max(80),
+  targetAmount: z.coerce.number().positive("Het doelbedrag moet hoger zijn dan nul."),
   currentAmount: z.coerce.number().min(0).default(0),
   deadline: z.string().optional(),
   color: z
@@ -22,7 +22,7 @@ const goalSchema = z.object({
 
 const contributionSchema = z.object({
   goalId: z.string().min(1),
-  amount: z.coerce.number().positive("Enter an amount greater than zero."),
+  amount: z.coerce.number().positive("Vul een bedrag hoger dan nul in."),
 });
 
 export async function createGoalAction(
@@ -39,14 +39,14 @@ export async function createGoalAction(
 
   if (!parsed.success) {
     return {
-      error: "Please check the goal details.",
+      error: "Controleer de gegevens van het spaardoel.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
 
   const viewer = await getViewer();
   if (!viewer?.household) {
-    return { error: "No household found." };
+    return { error: "Geen huishouden gevonden." };
   }
 
   if (isDemoMode) {
@@ -72,7 +72,7 @@ export async function createGoalAction(
     });
   } else {
     if (!isSupabaseConfigured) {
-      return { error: "Supabase is not configured." };
+      return { error: "Supabase is niet geconfigureerd." };
     }
     const supabase = await createClient();
     const { error } = await supabase.from("savings_goals").insert({
@@ -87,13 +87,13 @@ export async function createGoalAction(
     });
 
     if (error) {
-      return { error: error.message };
+      return { error: "Het spaardoel kon niet worden aangemaakt." };
     }
   }
 
   revalidatePath("/finances/goals");
   revalidatePath("/dashboard");
-  return { success: "Savings goal created." };
+  return { success: "Spaardoel aangemaakt." };
 }
 
 export async function contributeToGoalAction(
@@ -107,14 +107,14 @@ export async function contributeToGoalAction(
 
   if (!parsed.success) {
     return {
-      error: "Enter a valid amount.",
+      error: "Vul een geldig bedrag in.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
 
   const viewer = await getViewer();
   if (!viewer?.household) {
-    return { error: "No household found." };
+    return { error: "Geen huishouden gevonden." };
   }
 
   if (isDemoMode) {
@@ -137,7 +137,7 @@ export async function contributeToGoalAction(
     );
   } else {
     if (!isSupabaseConfigured) {
-      return { error: "Supabase is not configured." };
+      return { error: "Supabase is niet geconfigureerd." };
     }
     const supabase = await createClient();
     const { error } = await supabase.rpc("contribute_to_savings_goal", {
@@ -147,14 +147,16 @@ export async function contributeToGoalAction(
 
     if (error) {
       return {
-        error: error.message.includes("not found")
-          ? "Savings goal not found."
-          : error.message,
+        error:
+          error.message.includes("not found") ||
+          error.message.includes("niet gevonden")
+          ? "Spaardoel niet gevonden."
+          : "De bijdrage kon niet worden toegevoegd.",
       };
     }
   }
 
   revalidatePath("/finances/goals");
   revalidatePath("/dashboard");
-  return { success: "Contribution added." };
+  return { success: "Bijdrage toegevoegd." };
 }

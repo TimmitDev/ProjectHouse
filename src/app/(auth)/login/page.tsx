@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getViewer } from "@/lib/data";
 import { isDemoMode } from "@/lib/env";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = { title: "Inloggen" };
 
 export default async function LoginPage() {
   const viewer = await getViewer();
@@ -19,10 +19,10 @@ export default async function LoginPage() {
     <>
       <div className="mb-7 text-center">
         <h1 className="text-2xl font-semibold tracking-[-0.04em] text-black">
-          Welcome back
+          Welkom terug
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Sign in to continue to Nestly.
+          Log in om verder te gaan naar Nestly.
         </p>
       </div>
       <AuthForm mode="login" />
@@ -41,7 +41,7 @@ export default async function LoginPage() {
               variant="secondary"
               className="w-full border-zinc-300 text-black hover:bg-zinc-50"
             >
-              View sample household
+              Voorbeeldhuishouden bekijken
             </Button>
           </form>
         </>

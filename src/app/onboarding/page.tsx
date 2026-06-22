@@ -6,7 +6,7 @@ import { HouseholdForm } from "@/components/onboarding/household-form";
 import { OnboardingStepper } from "@/components/onboarding/stepper";
 import { getViewer } from "@/lib/data";
 
-export const metadata: Metadata = { title: "Set up your household" };
+export const metadata: Metadata = { title: "Huishouden instellen" };
 
 export default async function OnboardingPage() {
   const viewer = await getViewer();
@@ -23,7 +23,7 @@ export default async function OnboardingPage() {
         <header className="flex items-center justify-between">
           <Logo href="/onboarding" />
           <p className="hidden text-sm text-slate-500 sm:block">
-            Signed in as{" "}
+            Ingelogd als{" "}
             <span className="font-medium text-slate-700">
               {viewer.profile.email}
             </span>
@@ -35,19 +35,19 @@ export default async function OnboardingPage() {
           <div className="mt-10 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_24px_70px_rgba(15,23,42,0.06)] sm:p-8">
             <div className="mb-7">
               <p className="text-sm font-medium text-[var(--accent)]">
-                Step 2 of 3
+                Stap 2 van 3
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-slate-950">
-                Bring your household together
+                Breng je huishouden samen
               </h1>
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                Start a new household or join one with an invite code.
+                Maak een nieuw huishouden aan of neem deel met een uitnodigingscode.
               </p>
             </div>
             <HouseholdForm />
           </div>
           <p className="mt-5 text-center text-xs text-slate-400">
-            You can invite more members from your dashboard at any time.
+            Je kunt later vanuit het dashboard meer leden uitnodigen.
           </p>
         </main>
       </div>

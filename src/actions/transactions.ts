@@ -9,9 +9,9 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/types/app";
 
 const transactionSchema = z.object({
-  description: z.string().trim().min(1, "Enter a description.").max(120),
-  category: z.string().trim().min(1, "Choose a category.").max(50),
-  amount: z.coerce.number().positive("Amount must be greater than zero."),
+  description: z.string().trim().min(1, "Vul een omschrijving in.").max(120),
+  category: z.string().trim().min(1, "Kies een categorie.").max(50),
+  amount: z.coerce.number().positive("Het bedrag moet hoger zijn dan nul."),
   type: z.enum(["income", "expense"]),
   transactionDate: z.iso.date(),
 });
@@ -30,19 +30,19 @@ export async function createTransactionAction(
 
   if (!parsed.success) {
     return {
-      error: "Please check the transaction details.",
+      error: "Controleer de transactiegegevens.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
 
   const viewer = await getViewer();
   if (!viewer?.household) {
-    return { error: "No household found." };
+    return { error: "Geen huishouden gevonden." };
   }
 
   if (!isDemoMode) {
     if (!isSupabaseConfigured) {
-      return { error: "Supabase is not configured." };
+      return { error: "Supabase is niet geconfigureerd." };
     }
     const supabase = await createClient();
     const { error } = await supabase.from("transactions").insert({
@@ -56,7 +56,7 @@ export async function createTransactionAction(
     });
 
     if (error) {
-      return { error: error.message };
+      return { error: "De transactie kon niet worden toegevoegd." };
     }
   }
 
@@ -64,7 +64,7 @@ export async function createTransactionAction(
   revalidatePath("/dashboard");
   return {
     success: isDemoMode
-      ? "Demo transaction accepted. Connect Supabase to persist it."
-      : "Transaction added.",
+      ? "Demotransactie verwerkt. Koppel Supabase om deze op te slaan."
+      : "Transactie toegevoegd.",
   };
 }

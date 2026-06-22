@@ -38,7 +38,7 @@ export function Modal({
       <button
         className="absolute inset-0 bg-slate-950/30 backdrop-blur-[2px]"
         onClick={onClose}
-        aria-label="Close dialog"
+        aria-label="Venster sluiten"
       />
       <div
         role="dialog"
@@ -64,7 +64,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             className="grid size-9 shrink-0 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-            aria-label="Close dialog"
+            aria-label="Venster sluiten"
           >
             <X className="size-5" />
           </button>

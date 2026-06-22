@@ -7,7 +7,7 @@ create type public.transaction_type as enum ('income', 'expense');
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null default '',
-  locale text not null default 'en-US',
+  locale text not null default 'nl-NL',
   currency text not null default 'EUR',
   accent_color text not null default '#52796F',
   onboarding_complete boolean not null default false,
@@ -180,11 +180,11 @@ declare
   current_user_id uuid := (select auth.uid());
 begin
   if current_user_id is null then
-    raise exception 'Authentication required';
+    raise exception 'Authenticatie vereist';
   end if;
 
   if contribution_amount <= 0 then
-    raise exception 'Contribution must be greater than zero';
+    raise exception 'De bijdrage moet hoger zijn dan nul';
   end if;
 
   update public.savings_goals
@@ -201,7 +201,7 @@ begin
   returning current_amount into updated_amount;
 
   if updated_amount is null then
-    raise exception 'Savings goal not found';
+    raise exception 'Spaardoel niet gevonden';
   end if;
 
   return updated_amount;
@@ -222,17 +222,17 @@ declare
   current_user_id uuid := (select auth.uid());
 begin
   if current_user_id is null then
-    raise exception 'Authentication required';
+    raise exception 'Authenticatie vereist';
   end if;
 
   if char_length(trim(household_name)) < 2 then
-    raise exception 'Household name is too short';
+    raise exception 'De huishoudnaam is te kort';
   end if;
 
   if exists (
     select 1 from public.household_members where user_id = current_user_id
   ) then
-    raise exception 'You already belong to a household';
+    raise exception 'Je bent al lid van een huishouden';
   end if;
 
   insert into public.households (name, invite_code, currency, created_by)
@@ -276,13 +276,13 @@ declare
   current_user_id uuid := (select auth.uid());
 begin
   if current_user_id is null then
-    raise exception 'Authentication required';
+    raise exception 'Authenticatie vereist';
   end if;
 
   if exists (
     select 1 from public.household_members where user_id = current_user_id
   ) then
-    raise exception 'You already belong to a household';
+    raise exception 'Je bent al lid van een huishouden';
   end if;
 
   select id into target_household_id
@@ -290,7 +290,7 @@ begin
   where invite_code = upper(trim(household_code));
 
   if target_household_id is null then
-    raise exception 'No household found for this code';
+    raise exception 'Geen huishouden gevonden met deze code';
   end if;
 
   insert into public.household_members (household_id, user_id, role)

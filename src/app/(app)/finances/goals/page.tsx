@@ -11,7 +11,7 @@ import { Card, PageHeader } from "@/components/ui/card";
 import { getDashboardData, getViewer } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Savings goals" };
+export const metadata: Metadata = { title: "Spaardoelen" };
 
 export default async function SavingsGoalsPage() {
   const viewer = await getViewer();
@@ -31,28 +31,28 @@ export default async function SavingsGoalsPage() {
   return (
     <div className="space-y-7">
       <PageHeader
-        eyebrow="Finances"
-        title="Savings goals"
-        description="Turn shared plans into visible progress, one contribution at a time."
+        eyebrow="Financiën"
+        title="Spaardoelen"
+        description="Maak gezamenlijke plannen zichtbaar, bijdrage voor bijdrage."
         actions={<CreateGoalButton />}
       />
 
       <Card className="overflow-hidden">
         <div className="grid gap-0 sm:grid-cols-3">
           <div className="border-b border-slate-100 p-5 sm:border-b-0 sm:border-r sm:p-6">
-            <p className="text-xs font-medium text-slate-400">Total saved</p>
+            <p className="text-xs font-medium text-slate-400">Totaal gespaard</p>
             <p className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-slate-950">
               {formatCurrency(totalSaved, currency, locale)}
             </p>
           </div>
           <div className="border-b border-slate-100 p-5 sm:border-b-0 sm:border-r sm:p-6">
-            <p className="text-xs font-medium text-slate-400">Combined target</p>
+            <p className="text-xs font-medium text-slate-400">Gezamenlijk doelbedrag</p>
             <p className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-slate-950">
               {formatCurrency(totalTarget, currency, locale)}
             </p>
           </div>
           <div className="p-5 sm:p-6">
-            <p className="text-xs font-medium text-slate-400">Active goals</p>
+            <p className="text-xs font-medium text-slate-400">Actieve doelen</p>
             <p className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-slate-950">
               {data.goals.length}
             </p>
@@ -78,7 +78,7 @@ export default async function SavingsGoalsPage() {
                     )}
                   </span>
                   <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500">
-                    {complete ? "Completed" : "In progress"}
+                    {complete ? "Behaald" : "Bezig"}
                   </span>
                 </div>
                 <div className="mt-5">
@@ -102,11 +102,11 @@ export default async function SavingsGoalsPage() {
               <Target className="size-7" />
             </span>
             <h2 className="mt-5 text-lg font-semibold text-slate-900">
-              Your first goal starts here
+              Je eerste doel begint hier
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Whether it is a safety buffer or a big adventure, make the plan
-              visible to everyone.
+              Of het nu om een financiële buffer of een groot avontuur gaat:
+              maak het plan zichtbaar voor iedereen.
             </p>
             <div className="mt-5 flex justify-center">
               <CreateGoalButton />

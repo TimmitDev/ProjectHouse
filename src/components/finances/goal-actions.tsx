@@ -27,22 +27,22 @@ export function CreateGoalButton() {
     <>
       <Button onClick={() => setOpen(true)}>
         <Plus className="size-4" />
-        New goal
+        Nieuw doel
       </Button>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Create a savings goal"
-        description="Give your household something concrete to work towards."
+        title="Spaardoel aanmaken"
+        description="Geef je huishouden een concreet doel om samen naartoe te werken."
       >
         <form action={action} className="space-y-4">
           <ActionMessage error={state.error} success={state.success} />
-          <Field label="Goal name" error={state.fieldErrors?.name?.[0]}>
-            <Input name="name" placeholder="Summer getaway" required />
+          <Field label="Naam van het doel" error={state.fieldErrors?.name?.[0]}>
+            <Input name="name" placeholder="Zomervakantie" required />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
-              label="Target amount"
+              label="Doelbedrag"
               error={state.fieldErrors?.targetAmount?.[0]}
             >
               <Input
@@ -55,7 +55,7 @@ export function CreateGoalButton() {
               />
             </Field>
             <Field
-              label="Already saved"
+              label="Al gespaard"
               error={state.fieldErrors?.currentAmount?.[0]}
             >
               <Input
@@ -67,10 +67,10 @@ export function CreateGoalButton() {
               />
             </Field>
           </div>
-          <Field label="Target date" error={state.fieldErrors?.deadline?.[0]}>
+          <Field label="Streefdatum" error={state.fieldErrors?.deadline?.[0]}>
             <Input name="deadline" type="date" />
           </Field>
-          <Field label="Color" error={state.fieldErrors?.color?.[0]}>
+          <Field label="Kleur" error={state.fieldErrors?.color?.[0]}>
             <div className="flex flex-wrap gap-3">
               {[
                 "#52796F",
@@ -98,10 +98,10 @@ export function CreateGoalButton() {
           </Field>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setOpen(false)}>
-              Cancel
+              Annuleren
             </Button>
-            <SubmitButton pendingLabel="Creating...">
-              Create goal
+            <SubmitButton pendingLabel="Aanmaken...">
+              Doel aanmaken
             </SubmitButton>
           </div>
         </form>
@@ -132,19 +132,19 @@ export function ContributeButton({
         onClick={() => setOpen(true)}
       >
         <TrendingUp className="size-4" />
-        Add contribution
+        Bijdrage toevoegen
       </Button>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title={`Add to ${goalName}`}
-        description="Record money your household has put towards this goal."
+        title={`Toevoegen aan ${goalName}`}
+        description="Registreer wat je huishouden voor dit doel heeft gespaard."
       >
         <form action={action} className="space-y-4">
           <input type="hidden" name="goalId" value={goalId} />
           <ActionMessage error={state.error} success={state.success} />
           <Field
-            label="Contribution amount"
+            label="Bedrag van de bijdrage"
             error={state.fieldErrors?.amount?.[0]}
           >
             <Input
@@ -159,9 +159,9 @@ export function ContributeButton({
           </Field>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setOpen(false)}>
-              Cancel
+              Annuleren
             </Button>
-            <SubmitButton pendingLabel="Adding...">Add amount</SubmitButton>
+            <SubmitButton pendingLabel="Toevoegen...">Bedrag toevoegen</SubmitButton>
           </div>
         </form>
       </Modal>

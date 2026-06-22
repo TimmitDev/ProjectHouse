@@ -113,7 +113,7 @@ export async function getViewer(): Promise<Viewer | null> {
         profile?.full_name ||
         String(user.user_metadata.full_name ?? user.email?.split("@")[0] ?? ""),
       email: user.email ?? "",
-      locale: profile?.locale ?? "en-US",
+      locale: profile?.locale ?? "nl-NL",
       currency: profile?.currency ?? "EUR",
       accentColor: profile?.accent_color ?? "#52796F",
     },
@@ -264,7 +264,7 @@ export async function getDashboardData(
         );
         return {
           id: member.user_id,
-          name: profile?.full_name || "Household member",
+          name: profile?.full_name || "Huishoudlid",
           email: member.user_id === viewer.profile.id ? viewer.profile.email : "",
           role: member.role,
         };

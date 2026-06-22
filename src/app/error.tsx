@@ -23,13 +23,13 @@ export default function GlobalError({
           <AlertTriangle className="size-6" />
         </span>
         <h1 className="mt-6 text-2xl font-semibold text-slate-950">
-          Something went wrong
+          Er is iets misgegaan
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          We could not load this page. Your data has not been changed.
+          We konden deze pagina niet laden. Je gegevens zijn niet gewijzigd.
         </p>
         <Button onClick={reset} className="mt-6">
-          Try again
+          Opnieuw proberen
         </Button>
       </div>
     </main>

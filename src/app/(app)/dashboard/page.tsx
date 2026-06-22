@@ -19,12 +19,13 @@ import { Card, PageHeader } from "@/components/ui/card";
 import { getDashboardData, getViewer } from "@/lib/data";
 import {
   formatCurrency,
+  formatHouseholdRole,
   formatLongDate,
   getFirstName,
   getInitials,
 } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Overview" };
+export const metadata: Metadata = { title: "Overzicht" };
 
 export default async function DashboardPage() {
   const viewer = await getViewer();
@@ -36,13 +37,13 @@ export default async function DashboardPage() {
     <div className="space-y-7">
       <PageHeader
         eyebrow={formatLongDate(new Date(), locale)}
-        title={`Good morning, ${getFirstName(viewer.profile.fullName)}`}
-        description={`Here is what is happening in ${viewer.household.name} today.`}
+        title={`Goedemorgen, ${getFirstName(viewer.profile.fullName)}`}
+        description={`Dit gebeurt er vandaag in ${viewer.household.name}.`}
         actions={
           viewer.isDemo ? (
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--accent)_22%,white)] bg-[color-mix(in_srgb,var(--accent)_8%,white)] px-3 py-1.5 text-xs font-medium text-[var(--accent)]">
               <CheckCircle2 className="size-3.5" />
-              Sample household
+              Voorbeeldhuishouden
             </span>
           ) : undefined
         }
@@ -50,27 +51,27 @@ export default async function DashboardPage() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Available balance"
+          label="Beschikbaar saldo"
           value={formatCurrency(data.balance, currency, locale)}
-          meta="Across household activity"
+          meta="Alle huishoudactiviteiten"
           type="balance"
         />
         <StatCard
-          label="Income this month"
+          label="Inkomsten deze maand"
           value={formatCurrency(data.monthlyIncome, currency, locale)}
-          meta="Monthly"
+          meta="Deze maand"
           type="income"
         />
         <StatCard
-          label="Expenses this month"
+          label="Uitgaven deze maand"
           value={formatCurrency(data.monthlyExpenses, currency, locale)}
-          meta="Monthly"
+          meta="Deze maand"
           type="expenses"
         />
         <StatCard
-          label="Saved this month"
+          label="Gespaard deze maand"
           value={formatCurrency(data.monthlySavings, currency, locale)}
-          meta={`${Math.max(0, data.savingsRate)}% rate`}
+          meta={`${Math.max(0, data.savingsRate)}% spaarquote`}
           type="savings"
           positive={data.monthlySavings >= 0}
         />
@@ -81,14 +82,14 @@ export default async function DashboardPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-                Monthly overview
+                Maandoverzicht
               </h2>
               <p className="mt-1 text-xs text-slate-400">
-                Income, expenses and the amount left to save.
+                Inkomsten, uitgaven en wat er overblijft om te sparen.
               </p>
             </div>
             <span className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-500">
-              This month
+              Deze maand
             </span>
           </div>
           <SpendingBars
@@ -101,7 +102,7 @@ export default async function DashboardPage() {
           <div className="mt-7 rounded-xl bg-slate-50 p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs text-slate-400">Savings rate</p>
+                <p className="text-xs text-slate-400">Spaarquote</p>
                 <p className="mt-1 text-lg font-semibold text-slate-900">
                   {Math.max(0, data.savingsRate)}%
                 </p>
@@ -116,7 +117,7 @@ export default async function DashboardPage() {
                   />
                 </div>
                 <p className="mt-2 text-right text-[11px] text-slate-400">
-                  of monthly household income
+                  van het maandelijkse huishoudinkomen
                 </p>
               </div>
             </div>
@@ -127,11 +128,11 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-                Household
+                Huishouden
               </h2>
               <p className="mt-1 text-xs text-slate-400">
                 {data.members.length}{" "}
-                {data.members.length === 1 ? "member" : "members"}
+                {data.members.length === 1 ? "lid" : "leden"}
               </p>
             </div>
             <div className="flex -space-x-2">
@@ -159,7 +160,7 @@ export default async function DashboardPage() {
                     {member.name}
                   </p>
                   <p className="text-xs capitalize text-slate-400">
-                    {member.role}
+                    {formatHouseholdRole(member.role)}
                   </p>
                 </div>
               </div>
@@ -173,17 +174,17 @@ export default async function DashboardPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-                Savings goals
+                Spaardoelen
               </h2>
               <p className="mt-1 text-xs text-slate-400">
-                Shared progress towards what matters.
+                Samen vooruitgang boeken voor wat belangrijk is.
               </p>
             </div>
             <Link
               href="/finances/goals"
               className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
             >
-              View all <ArrowRight className="size-3.5" />
+              Alles bekijken <ArrowRight className="size-3.5" />
             </Link>
           </div>
           {data.goals.length ? (
@@ -202,13 +203,13 @@ export default async function DashboardPage() {
               <div>
                 <CalendarDays className="mx-auto size-6 text-slate-300" />
                 <p className="mt-2 text-sm font-medium text-slate-600">
-                  No goals yet
+                  Nog geen doelen
                 </p>
                 <Link
                   href="/finances/goals"
                   className="mt-2 inline-block text-xs font-medium text-[var(--accent)]"
                 >
-                  Create your first goal
+                  Maak je eerste doel
                 </Link>
               </div>
             </div>
@@ -219,17 +220,17 @@ export default async function DashboardPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-                Recent activity
+                Recente activiteit
               </h2>
               <p className="mt-1 text-xs text-slate-400">
-                Latest shared finance entries.
+                De nieuwste gezamenlijke financiële activiteiten.
               </p>
             </div>
             <Link
               href="/finances"
               className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
             >
-              View all <ArrowRight className="size-3.5" />
+              Alles bekijken <ArrowRight className="size-3.5" />
             </Link>
           </div>
           <TransactionList
@@ -247,9 +248,9 @@ export default async function DashboardPage() {
             <UsersRound className="size-5" />
           </span>
           <div>
-            <p className="font-medium">Make Nestly yours</p>
+            <p className="font-medium">Maak Nestly van jullie</p>
             <p className="mt-1 text-sm text-white/70">
-              Choose which modules your household sees and uses.
+              Kies welke modules je huishouden ziet en gebruikt.
             </p>
           </div>
         </div>
@@ -257,7 +258,7 @@ export default async function DashboardPage() {
           href="/modules"
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-[var(--accent)] transition hover:bg-white/90"
         >
-          Manage modules <ArrowRight className="size-4" />
+          Modules beheren <ArrowRight className="size-4" />
         </Link>
       </Card>
     </div>

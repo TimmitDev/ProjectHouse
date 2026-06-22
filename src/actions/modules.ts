@@ -20,16 +20,16 @@ export async function toggleModuleAction(
   enabled: boolean,
 ) {
   if (!validModules.includes(moduleKey)) {
-    return { error: "Unknown module." };
+    return { error: "Onbekende module." };
   }
 
   const viewer = await getViewer();
   if (!viewer?.household) {
-    return { error: "No household found." };
+    return { error: "Geen huishouden gevonden." };
   }
 
   if (viewer.household.role === "member") {
-    return { error: "Only household admins can manage modules." };
+    return { error: "Alleen beheerders kunnen modules beheren." };
   }
 
   if (isDemoMode) {
@@ -50,7 +50,7 @@ export async function toggleModuleAction(
     );
   } else {
     if (!isSupabaseConfigured) {
-      return { error: "Supabase is not configured." };
+      return { error: "Supabase is niet geconfigureerd." };
     }
     const supabase = await createClient();
     const { error } = await supabase.from("household_modules").upsert(
@@ -64,7 +64,7 @@ export async function toggleModuleAction(
     );
 
     if (error) {
-      return { error: error.message };
+      return { error: "De module kon niet worden bijgewerkt." };
     }
   }
 

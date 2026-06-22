@@ -28,30 +28,30 @@ export function AddTransactionButton() {
     <>
       <Button onClick={() => setOpen(true)}>
         <Plus className="size-4" />
-        Add transaction
+        Transactie toevoegen
       </Button>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Add a transaction"
-        description="Record shared income or spending for your household."
+        title="Transactie toevoegen"
+        description="Registreer gezamenlijke inkomsten of uitgaven van je huishouden."
       >
         <form action={action} className="space-y-4">
           <ActionMessage error={state.error} success={state.success} />
           <Field
-            label="Description"
+            label="Omschrijving"
             error={state.fieldErrors?.description?.[0]}
           >
-            <Input name="description" placeholder="Grocery run" required />
+            <Input name="description" placeholder="Boodschappen" required />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Type" error={state.fieldErrors?.type?.[0]}>
               <Select name="type" defaultValue="expense">
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
+                <option value="expense">Uitgave</option>
+                <option value="income">Inkomst</option>
               </Select>
             </Field>
-            <Field label="Amount" error={state.fieldErrors?.amount?.[0]}>
+            <Field label="Bedrag" error={state.fieldErrors?.amount?.[0]}>
               <Input
                 name="amount"
                 type="number"
@@ -63,19 +63,19 @@ export function AddTransactionButton() {
             </Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Category" error={state.fieldErrors?.category?.[0]}>
-              <Select name="category" defaultValue="Groceries">
-                <option>Groceries</option>
-                <option>Housing</option>
-                <option>Utilities</option>
-                <option>Transport</option>
-                <option>Dining</option>
-                <option>Income</option>
-                <option>Savings</option>
-                <option>Other</option>
+            <Field label="Categorie" error={state.fieldErrors?.category?.[0]}>
+              <Select name="category" defaultValue="Boodschappen">
+                <option>Boodschappen</option>
+                <option>Wonen</option>
+                <option>Vaste lasten</option>
+                <option>Vervoer</option>
+                <option>Uit eten</option>
+                <option>Inkomsten</option>
+                <option>Sparen</option>
+                <option>Overig</option>
               </Select>
             </Field>
-            <Field label="Date" error={state.fieldErrors?.transactionDate?.[0]}>
+            <Field label="Datum" error={state.fieldErrors?.transactionDate?.[0]}>
               <Input
                 name="transactionDate"
                 type="date"
@@ -86,10 +86,10 @@ export function AddTransactionButton() {
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setOpen(false)}>
-              Cancel
+              Annuleren
             </Button>
-            <SubmitButton pendingLabel="Adding...">
-              Add transaction
+            <SubmitButton pendingLabel="Toevoegen...">
+              Transactie toevoegen
             </SubmitButton>
           </div>
         </form>

@@ -16,11 +16,12 @@ export default async function CheckEmailPage({
         <MailCheck className="size-7" />
       </div>
       <h1 className="mt-6 text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-        Check your inbox
+        Controleer je inbox
       </h1>
       <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-500">
-        We sent a confirmation link{email ? ` to ${email}` : ""}. Open it to
-        continue setting up your household.
+        We hebben een bevestigingslink verstuurd
+        {email ? ` naar ${email}` : ""}. Open deze om verder te gaan met het
+        instellen van je huishouden.
       </p>
       <Link
         href="/login"
@@ -29,7 +30,7 @@ export default async function CheckEmailPage({
           className: "mt-7 w-full",
         })}
       >
-        Back to sign in
+        Terug naar inloggen
       </Link>
     </div>
   );

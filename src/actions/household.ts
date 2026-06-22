@@ -9,12 +9,12 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/types/app";
 
 const createSchema = z.object({
-  householdName: z.string().trim().min(2, "Enter a household name.").max(60),
+  householdName: z.string().trim().min(2, "Vul een huishoudnaam in.").max(60),
   currency: z.string().length(3),
 });
 
 const joinSchema = z.object({
-  inviteCode: z.string().trim().min(4, "Enter a valid invite code.").max(20),
+  inviteCode: z.string().trim().min(4, "Vul een geldige uitnodigingscode in.").max(20),
 });
 
 async function completeDemoHousehold() {
@@ -39,7 +39,7 @@ export async function createHouseholdAction(
 
   if (!parsed.success) {
     return {
-      error: "Please check the form.",
+      error: "Controleer het formulier.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
@@ -50,7 +50,7 @@ export async function createHouseholdAction(
   }
 
   if (!isSupabaseConfigured) {
-    return { error: "Supabase is not configured." };
+    return { error: "Supabase is niet geconfigureerd." };
   }
 
   const supabase = await createClient();
@@ -60,7 +60,13 @@ export async function createHouseholdAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return {
+      error:
+        error.message.includes("already belong") ||
+        error.message.includes("al lid")
+        ? "Je bent al lid van een huishouden."
+        : "Het huishouden kon niet worden aangemaakt.",
+    };
   }
 
   redirect("/dashboard");
@@ -76,7 +82,7 @@ export async function joinHouseholdAction(
 
   if (!parsed.success) {
     return {
-      error: "Enter the invite code you received.",
+      error: "Vul de ontvangen uitnodigingscode in.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
@@ -87,7 +93,7 @@ export async function joinHouseholdAction(
   }
 
   if (!isSupabaseConfigured) {
-    return { error: "Supabase is not configured." };
+    return { error: "Supabase is niet geconfigureerd." };
   }
 
   const supabase = await createClient();
@@ -97,9 +103,14 @@ export async function joinHouseholdAction(
 
   if (error) {
     return {
-      error: error.message.includes("No household")
-        ? "We could not find a household with that invite code."
-        : error.message,
+      error:
+        error.message.includes("No household") ||
+        error.message.includes("Geen huishouden")
+        ? "We konden geen huishouden met deze uitnodigingscode vinden."
+        : error.message.includes("already belong") ||
+            error.message.includes("al lid")
+          ? "Je bent al lid van een huishouden."
+          : "Deelname aan het huishouden is mislukt.",
     };
   }
 

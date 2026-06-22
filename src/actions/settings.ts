@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/types/app";
 
 const settingsSchema = z.object({
-  fullName: z.string().trim().min(2, "Enter your full name.").max(80),
+  fullName: z.string().trim().min(2, "Vul je volledige naam in.").max(80),
   locale: z.enum(["en-US", "en-GB", "nl-NL", "de-DE", "fr-FR", "es-ES"]),
   currency: z.enum(["EUR", "USD", "GBP", "CAD", "AUD", "JPY"]),
   accentColor: z.enum([
@@ -36,14 +36,14 @@ export async function updateSettingsAction(
 
   if (!parsed.success) {
     return {
-      error: "Please check your settings.",
+      error: "Controleer je instellingen.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
 
   const viewer = await getViewer();
   if (!viewer) {
-    return { error: "Your session has expired. Please sign in again." };
+    return { error: "Je sessie is verlopen. Log opnieuw in." };
   }
 
   if (isDemoMode) {
@@ -61,7 +61,7 @@ export async function updateSettingsAction(
     cookieStore.set("nestly_demo_accent", parsed.data.accentColor, options);
   } else {
     if (!isSupabaseConfigured) {
-      return { error: "Supabase is not configured." };
+      return { error: "Supabase is niet geconfigureerd." };
     }
     const supabase = await createClient();
     const { error } = await supabase
@@ -76,10 +76,10 @@ export async function updateSettingsAction(
       .eq("id", viewer.profile.id);
 
     if (error) {
-      return { error: error.message };
+      return { error: "Je instellingen konden niet worden opgeslagen." };
     }
   }
 
   revalidatePath("/", "layout");
-  return { success: "Your settings have been saved." };
+  return { success: "Je instellingen zijn opgeslagen." };
 }

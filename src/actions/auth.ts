@@ -9,12 +9,12 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/types/app";
 
 const loginSchema = z.object({
-  email: z.email("Enter a valid email address."),
-  password: z.string().min(8, "Password must contain at least 8 characters."),
+  email: z.email("Vul een geldig e-mailadres in."),
+  password: z.string().min(8, "Het wachtwoord moet minimaal 8 tekens bevatten."),
 });
 
 const registerSchema = loginSchema.extend({
-  fullName: z.string().trim().min(2, "Enter your full name.").max(80),
+  fullName: z.string().trim().min(2, "Vul je volledige naam in.").max(80),
 });
 
 async function setDemoCookies(includeHousehold: boolean, name?: string) {
@@ -49,7 +49,7 @@ export async function loginAction(
 
   if (!parsed.success) {
     return {
-      error: "Please check the highlighted fields.",
+      error: "Controleer de gemarkeerde velden.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
@@ -60,14 +60,14 @@ export async function loginAction(
   }
 
   if (!isSupabaseConfigured) {
-    return { error: "Supabase is not configured for this deployment." };
+    return { error: "Supabase is niet geconfigureerd voor deze omgeving." };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
-    return { error: "Email or password is incorrect." };
+    return { error: "Het e-mailadres of wachtwoord is onjuist." };
   }
 
   redirect("/dashboard");
@@ -85,7 +85,7 @@ export async function registerAction(
 
   if (!parsed.success) {
     return {
-      error: "Please check the highlighted fields.",
+      error: "Controleer de gemarkeerde velden.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
@@ -96,7 +96,7 @@ export async function registerAction(
   }
 
   if (!isSupabaseConfigured) {
-    return { error: "Supabase is not configured for this deployment." };
+    return { error: "Supabase is niet geconfigureerd voor deze omgeving." };
   }
 
   const supabase = await createClient();
@@ -113,8 +113,8 @@ export async function registerAction(
     return {
       error:
         error.message === "User already registered"
-          ? "An account with this email already exists."
-          : error.message,
+          ? "Er bestaat al een account met dit e-mailadres."
+          : "Het account kon niet worden aangemaakt. Probeer het opnieuw.",
     };
   }
 

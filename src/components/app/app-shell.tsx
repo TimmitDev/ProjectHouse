@@ -18,11 +18,11 @@ import { useState } from "react";
 import { logoutAction } from "@/actions/auth";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
-import { cn, getInitials } from "@/lib/utils";
+import { cn, formatHouseholdRole, getInitials } from "@/lib/utils";
 import type { Viewer } from "@/types/app";
 
 const mainNav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Overzicht", icon: LayoutDashboard },
 ];
 
 export function AppShell({
@@ -72,7 +72,7 @@ export function AppShell({
         <button
           className="grid size-9 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
           onClick={() => setMobileOpen(false)}
-          aria-label="Close navigation"
+          aria-label="Navigatie sluiten"
         >
           <X className="size-5" />
         </button>
@@ -81,20 +81,20 @@ export function AppShell({
       <div className="mt-8 px-2">
         <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
           <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--accent)] text-xs font-semibold text-white">
-            {getInitials(viewer.household?.name ?? "My household")}
+            {getInitials(viewer.household?.name ?? "Mijn huishouden")}
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-slate-800">
               {viewer.household?.name}
             </p>
             <p className="text-xs capitalize text-slate-400">
-              {viewer.household?.role}
+              {viewer.household && formatHouseholdRole(viewer.household.role)}
             </p>
           </div>
         </div>
       </div>
 
-      <nav className="mt-6 flex-1 space-y-1" aria-label="Main navigation">
+      <nav className="mt-6 flex-1 space-y-1" aria-label="Hoofdnavigatie">
         {mainNav.map((item) =>
           navLink(item.href, item.label, item.icon),
         )}
@@ -113,7 +113,7 @@ export function AppShell({
               aria-expanded={financeOpen}
             >
               <WalletCards className="size-[18px]" />
-              <span className="flex-1 text-left">Finances</span>
+              <span className="flex-1 text-left">Financiën</span>
               <ChevronDown
                 className={cn(
                   "size-4 transition-transform",
@@ -123,8 +123,8 @@ export function AppShell({
             </button>
             {financeOpen && (
               <div className="mt-1 space-y-1">
-                {navLink("/finances", "Summary", WalletCards, true)}
-                {navLink("/finances/goals", "Savings goals", Goal, true)}
+                {navLink("/finances", "Samenvatting", WalletCards, true)}
+                {navLink("/finances/goals", "Spaardoelen", Goal, true)}
               </div>
             )}
           </div>
@@ -133,7 +133,7 @@ export function AppShell({
 
       <div className="space-y-1 border-t border-slate-100 pt-4">
         {navLink("/modules", "Modules", Boxes)}
-        {navLink("/settings", "Settings", Settings)}
+        {navLink("/settings", "Instellingen", Settings)}
 
         <div className="mt-3 flex items-center gap-3 rounded-xl px-2 py-2">
           <div className="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
@@ -151,7 +151,7 @@ export function AppShell({
             <button
               type="submit"
               className="grid size-8 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-              aria-label="Sign out"
+              aria-label="Uitloggen"
             >
               <LogOut className="size-4" />
             </button>
@@ -175,7 +175,7 @@ export function AppShell({
           <button
             className="absolute inset-0 bg-slate-950/30 backdrop-blur-[2px]"
             onClick={() => setMobileOpen(false)}
-            aria-label="Close navigation"
+            aria-label="Navigatie sluiten"
           />
           <div className="relative h-full">{sidebar}</div>
         </div>
@@ -188,7 +188,7 @@ export function AppShell({
             variant="secondary"
             size="sm"
             onClick={() => setMobileOpen(true)}
-            aria-label="Open navigation"
+            aria-label="Navigatie openen"
           >
             <Menu className="size-4" />
           </Button>

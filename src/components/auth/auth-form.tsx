@@ -27,30 +27,30 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       {!isLogin && (
         <Field
-          label="Full name"
+          label="Volledige naam"
           error={state.fieldErrors?.fullName?.[0]}
         >
           <Input
             name="fullName"
             autoComplete="name"
-            placeholder="Alex Morgan"
+            placeholder="Alex Jansen"
             required
           />
         </Field>
       )}
 
-      <Field label="Email address" error={state.fieldErrors?.email?.[0]}>
+      <Field label="E-mailadres" error={state.fieldErrors?.email?.[0]}>
         <Input
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder="jij@voorbeeld.nl"
           required
         />
       </Field>
 
       <Field
-        label="Password"
+        label="Wachtwoord"
         error={state.fieldErrors?.password?.[0]}
       >
         <div className="relative">
@@ -58,7 +58,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             name="password"
             type={showPassword ? "text" : "password"}
             autoComplete={isLogin ? "current-password" : "new-password"}
-            placeholder="At least 8 characters"
+            placeholder="Minimaal 8 tekens"
             className="pr-11"
             required
           />
@@ -66,7 +66,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             type="button"
             onClick={() => setShowPassword((value) => !value)}
             className="absolute right-1 top-1 grid size-9 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-700"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
           >
             {showPassword ? (
               <EyeOff className="size-4" />
@@ -80,18 +80,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       <SubmitButton
         className="w-full bg-black text-white hover:bg-zinc-800"
         size="lg"
-        pendingLabel={isLogin ? "Signing in..." : "Creating account..."}
+        pendingLabel={isLogin ? "Bezig met inloggen..." : "Account aanmaken..."}
       >
-        {isLogin ? "Sign in" : "Create account"}
+        {isLogin ? "Inloggen" : "Account aanmaken"}
       </SubmitButton>
 
       <p className="pt-2 text-center text-sm text-zinc-500">
-        {isLogin ? "No account?" : "Already registered?"}{" "}
+        {isLogin ? "Nog geen account?" : "Al een account?"}{" "}
         <Link
           href={isLogin ? "/register" : "/login"}
           className="font-medium text-black underline-offset-4 hover:underline"
         >
-          {isLogin ? "Register" : "Sign in"}
+          {isLogin ? "Registreren" : "Inloggen"}
         </Link>
       </p>
     </form>

@@ -20,7 +20,7 @@ export function InviteCode({ code }: { code: string }) {
     >
       <span>
         <span className="block text-[11px] font-medium uppercase tracking-[0.13em] text-slate-400">
-          Invite code
+          Uitnodigingscode
         </span>
         <span className="mt-1 block font-mono text-sm font-semibold tracking-[0.14em] text-slate-800">
           {code}

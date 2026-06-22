@@ -35,8 +35,8 @@ export function HouseholdForm() {
     <div>
       <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
         {[
-          { key: "create" as const, label: "Create", icon: Home },
-          { key: "join" as const, label: "Join", icon: UsersRound },
+          { key: "create" as const, label: "Aanmaken", icon: Home },
+          { key: "join" as const, label: "Deelnemen", icon: UsersRound },
         ].map((item) => (
           <button
             key={item.key}
@@ -60,45 +60,45 @@ export function HouseholdForm() {
       {mode === "create" ? (
         <form action={createAction} className="mt-4 space-y-4">
           <Field
-            label="Household name"
+            label="Naam van het huishouden"
             error={createState.fieldErrors?.householdName?.[0]}
           >
             <Input
               name="householdName"
-              placeholder="The Morgan Home"
+              placeholder="Huishouden Jansen"
               autoFocus
               required
             />
           </Field>
           <Field
-            label="Default currency"
+            label="Standaardvaluta"
             error={createState.fieldErrors?.currency?.[0]}
           >
             <Select name="currency" defaultValue="EUR">
               <option value="EUR">EUR — Euro</option>
-              <option value="USD">USD — US Dollar</option>
-              <option value="GBP">GBP — British Pound</option>
-              <option value="CAD">CAD — Canadian Dollar</option>
-              <option value="AUD">AUD — Australian Dollar</option>
-              <option value="JPY">JPY — Japanese Yen</option>
+              <option value="USD">USD — Amerikaanse dollar</option>
+              <option value="GBP">GBP — Britse pond</option>
+              <option value="CAD">CAD — Canadese dollar</option>
+              <option value="AUD">AUD — Australische dollar</option>
+              <option value="JPY">JPY — Japanse yen</option>
             </Select>
           </Field>
           <SubmitButton
             className="w-full"
             size="lg"
-            pendingLabel="Creating household..."
+            pendingLabel="Huishouden aanmaken..."
           >
-            Create household
+            Huishouden aanmaken
           </SubmitButton>
         </form>
       ) : (
         <form action={joinAction} className="mt-4 space-y-4">
           <div className="rounded-xl border border-[color-mix(in_srgb,var(--accent)_20%,white)] bg-[color-mix(in_srgb,var(--accent)_7%,white)] p-3.5 text-sm leading-5 text-slate-600">
-            Ask a household admin for the invite code. Codes are not
-            case-sensitive.
+            Vraag een beheerder om de uitnodigingscode. Hoofdletters maken
+            hierbij geen verschil.
           </div>
           <Field
-            label="Household invite code"
+            label="Uitnodigingscode"
             error={joinState.fieldErrors?.inviteCode?.[0]}
           >
             <div className="relative">
@@ -115,9 +115,9 @@ export function HouseholdForm() {
           <SubmitButton
             className="w-full"
             size="lg"
-            pendingLabel="Joining household..."
+            pendingLabel="Deelnemen aan huishouden..."
           >
-            Join household
+            Deelnemen aan huishouden
           </SubmitButton>
         </form>
       )}

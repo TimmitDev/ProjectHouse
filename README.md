@@ -1,76 +1,78 @@
 # Nestly
 
-A clean household app built with Next.js, TypeScript, Tailwind CSS and Supabase.
+Een overzichtelijke huishoudapp gebouwd met Next.js, TypeScript, Tailwind CSS
+en Supabase.
 
-## Included
+## Inbegrepen
 
-- Email/password authentication with server-side Supabase sessions
-- Three-step registration and household onboarding
-- Create a household or join with a private invite code
-- Responsive dashboard and mobile/desktop sidebar
-- Modular household features
-- Shared finance overview and transactions
-- Shared savings goals with atomic contributions
-- Account, locale, currency and theme-color settings
-- PostgreSQL Row Level Security for household data
-- Built-in local demo mode
+- Authenticatie met e-mailadres en wachtwoord via server-side Supabase-sessies
+- Registratie en huishoudinstelling in drie stappen
+- Een huishouden aanmaken of deelnemen met een privé-uitnodigingscode
+- Responsief dashboard met een sidebar voor mobiel en desktop
+- Modulaire functies voor het huishouden
+- Gedeeld financieel overzicht en transacties
+- Gedeelde spaardoelen met atomaire bijdragen
+- Instellingen voor account, regio, valuta en themakleur
+- PostgreSQL Row Level Security voor huishoudgegevens
+- Ingebouwde lokale demomodus
 
-## Local development
+## Lokale ontwikkeling
 
-1. Install dependencies:
+1. Installeer de afhankelijkheden:
 
    ```bash
    npm install
    ```
 
-2. Copy `.env.example` to `.env.local`.
+2. Kopieer `.env.example` naar `.env.local`.
 
-3. Add your Supabase project URL and publishable key. For a UI-only local demo:
+3. Voeg de project-URL en publishable key van Supabase toe. Gebruik voor een
+   lokale UI-demo zonder database:
 
    ```env
    NEXT_PUBLIC_DEMO_MODE=true
    ```
 
-4. Start the app:
+4. Start de app:
 
    ```bash
    npm run dev
    ```
 
-## Supabase setup
+## Supabase instellen
 
-Create a Supabase project and run:
+Maak een Supabase-project aan en voer het volgende uit:
 
 ```bash
-supabase link --project-ref YOUR_PROJECT_REF
+supabase link --project-ref JOUW_PROJECT_REF
 supabase db push
 ```
 
-Alternatively, paste
-`supabase/migrations/20260622000000_initial_schema.sql` into the Supabase SQL
-Editor.
+Je kunt de migraties in `supabase/migrations` ook uitvoeren via de SQL Editor
+van Supabase.
 
-In Supabase Authentication settings:
+Stel bij Supabase Authentication het volgende in:
 
-- Set the Site URL to your production domain.
-- Add `http://localhost:3000/auth/confirm` for local development.
-- Add `https://your-domain.com/auth/confirm` for production.
-- Keep leaked-password protection and email confirmation enabled for production.
+- Stel de Site URL in op je productiedomein.
+- Voeg `http://localhost:3000/auth/confirm` toe voor lokale ontwikkeling.
+- Voeg `https://jouw-domein.nl/auth/confirm` toe voor productie.
+- Laat bescherming tegen gelekte wachtwoorden en e-mailbevestiging ingeschakeld.
 
-## Vercel deployment
+## Publiceren op Vercel
 
-Import the repository into Vercel and configure:
+Importeer de repository in Vercel en configureer:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SUPABASE_URL=https://jouw-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_jouw-key
+NEXT_PUBLIC_SITE_URL=https://jouw-domein.nl
 NEXT_PUBLIC_DEMO_MODE=false
 ```
 
-No custom Vercel build configuration is required. Vercel will run `next build`.
+Er is geen aangepaste Vercel-buildconfiguratie nodig. Vercel voert automatisch
+`next build` uit.
 
-## Verification
+## Controle
 
 ```bash
 npm run lint
@@ -78,6 +80,6 @@ npm run typecheck
 npm run build
 ```
 
-Never expose a Supabase secret or service-role key through a `NEXT_PUBLIC_`
-environment variable. The app only needs the publishable key; authorization is
-enforced by the included RLS policies.
+Plaats nooit een Supabase secret key of service-role key in een
+`NEXT_PUBLIC_`-omgevingsvariabele. De app heeft alleen de publishable key nodig;
+toegang wordt beveiligd door de meegeleverde RLS-regels.

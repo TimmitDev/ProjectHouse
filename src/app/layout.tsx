@@ -4,11 +4,11 @@ import "@/app/globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Nestly — Your household, organized",
+    default: "Nestly — je huishouden op orde",
     template: "%s · Nestly",
   },
   description:
-    "A calm, shared space for your household finances, goals and everyday life.",
+    "Een rustige, gedeelde plek voor huishoudfinanciën, doelen en het dagelijks leven.",
   applicationName: "Nestly",
   robots: { index: false, follow: false },
 };
@@ -23,7 +23,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="nl">
       <body>{children}</body>
     </html>
   );

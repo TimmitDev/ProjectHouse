@@ -60,7 +60,7 @@ export function ModuleCard({
         </div>
         {!module.available ? (
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-500">
-            Coming soon
+            Binnenkort
           </span>
         ) : (
           <button
@@ -73,7 +73,7 @@ export function ModuleCard({
               "relative h-6 w-11 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50",
               checked ? "bg-[var(--accent)]" : "bg-slate-200",
             )}
-            aria-label={`${checked ? "Disable" : "Enable"} ${module.name}`}
+            aria-label={`${checked ? "Deactiveer" : "Activeer"} ${module.name}`}
           >
             <span
               className={cn(
@@ -97,12 +97,12 @@ export function ModuleCard({
       </div>
       <p className="mt-auto pt-5 text-xs text-slate-400">
         {!canManage
-          ? "Only admins can change modules"
+          ? "Alleen beheerders kunnen modules wijzigen"
           : checked
-            ? "Active for your household"
+            ? "Actief voor je huishouden"
             : module.available
-              ? "Not active"
-              : "In development"}
+              ? "Niet actief"
+              : "In ontwikkeling"}
       </p>
     </Card>
   );

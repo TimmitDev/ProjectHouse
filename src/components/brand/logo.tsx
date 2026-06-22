@@ -19,7 +19,7 @@ export function Logo({
         "inline-flex items-center gap-2.5 font-semibold tracking-[-0.03em] text-slate-900",
         className,
       )}
-      aria-label="Nestly home"
+      aria-label="Nestly startpagina"
     >
       <span className="grid size-9 place-items-center rounded-xl bg-[var(--accent)] text-white shadow-sm">
         <House className="size-[18px]" strokeWidth={2.25} />

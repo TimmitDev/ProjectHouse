@@ -12,7 +12,7 @@ import { Card, PageHeader } from "@/components/ui/card";
 import { getDashboardData, getViewer } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Finances" };
+export const metadata: Metadata = { title: "Financiën" };
 
 export default async function FinancesPage() {
   const viewer = await getViewer();
@@ -24,35 +24,35 @@ export default async function FinancesPage() {
   return (
     <div className="space-y-7">
       <PageHeader
-        eyebrow="Finances"
-        title="Household money, made clear"
-        description="A shared view of income, spending and progress — without spreadsheet chaos."
+        eyebrow="Financiën"
+        title="Duidelijk inzicht in huishoudgeld"
+        description="Eén gedeeld overzicht van inkomsten, uitgaven en voortgang — zonder spreadsheetchaos."
         actions={<AddTransactionButton />}
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Available balance"
+          label="Beschikbaar saldo"
           value={formatCurrency(data.balance, currency, locale)}
-          meta="All recorded activity"
+          meta="Alle geregistreerde activiteiten"
           type="balance"
         />
         <StatCard
-          label="Monthly income"
+          label="Maandelijkse inkomsten"
           value={formatCurrency(data.monthlyIncome, currency, locale)}
-          meta="This month"
+          meta="Deze maand"
           type="income"
         />
         <StatCard
-          label="Monthly expenses"
+          label="Maandelijkse uitgaven"
           value={formatCurrency(data.monthlyExpenses, currency, locale)}
-          meta="This month"
+          meta="Deze maand"
           type="expenses"
         />
         <StatCard
-          label="Monthly savings"
+          label="Maandelijks gespaard"
           value={formatCurrency(data.monthlySavings, currency, locale)}
-          meta={`${Math.max(0, data.savingsRate)}% rate`}
+          meta={`${Math.max(0, data.savingsRate)}% spaarquote`}
           type="savings"
           positive={data.monthlySavings >= 0}
         />
@@ -62,10 +62,10 @@ export default async function FinancesPage() {
         <Card className="p-5 sm:p-6">
           <div className="mb-6">
             <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-              This month
+              Deze maand
             </h2>
             <p className="mt-1 text-xs text-slate-400">
-              A simple view of where money is going.
+              Een eenvoudig overzicht van waar het geld naartoe gaat.
             </p>
           </div>
           <SpendingBars
@@ -77,9 +77,9 @@ export default async function FinancesPage() {
           />
           <div className="mt-8 grid grid-cols-3 gap-2 border-t border-slate-100 pt-5 text-center">
             {[
-              { icon: CircleDollarSign, label: "Income" },
-              { icon: ReceiptText, label: "Spending" },
-              { icon: PiggyBank, label: "Goals" },
+              { icon: CircleDollarSign, label: "Inkomsten" },
+              { icon: ReceiptText, label: "Uitgaven" },
+              { icon: PiggyBank, label: "Doelen" },
             ].map((item) => (
               <div key={item.label}>
                 <item.icon className="mx-auto size-4 text-slate-400" />
@@ -95,10 +95,10 @@ export default async function FinancesPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-                Transactions
+                Transacties
               </h2>
               <p className="mt-1 text-xs text-slate-400">
-                Most recent household entries.
+                De meest recente huishoudtransacties.
               </p>
             </div>
             <span className="grid size-9 place-items-center rounded-xl bg-slate-50 text-slate-400">

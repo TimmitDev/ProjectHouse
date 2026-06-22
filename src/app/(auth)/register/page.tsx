@@ -5,7 +5,7 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { OnboardingStepper } from "@/components/onboarding/stepper";
 import { getViewer } from "@/lib/data";
 
-export const metadata: Metadata = { title: "Create account" };
+export const metadata: Metadata = { title: "Account aanmaken" };
 
 export default async function RegisterPage() {
   const viewer = await getViewer();
@@ -18,10 +18,10 @@ export default async function RegisterPage() {
       <OnboardingStepper currentStep={1} monochrome />
       <div className="mb-7 mt-8 text-center">
         <h1 className="text-2xl font-semibold tracking-[-0.04em] text-black">
-          Create an account
+          Account aanmaken
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Start your household in a few steps.
+          Start je huishouden in een paar stappen.
         </p>
       </div>
       <AuthForm mode="register" />

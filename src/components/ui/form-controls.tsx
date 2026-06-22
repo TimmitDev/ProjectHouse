@@ -61,7 +61,7 @@ export function Field({
 
 export function SubmitButton({
   children,
-  pendingLabel = "Saving...",
+  pendingLabel = "Opslaan...",
   className,
   variant = "primary",
   size = "md",

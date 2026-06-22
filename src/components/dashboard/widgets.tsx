@@ -89,7 +89,7 @@ export function GoalProgress({
           </p>
           {!compact && goal.deadline && (
             <p className="mt-1 text-xs text-slate-400">
-              Target {formatDate(goal.deadline, locale)}
+              Streefdatum {formatDate(goal.deadline, locale)}
             </p>
           )}
         </div>
@@ -108,7 +108,7 @@ export function GoalProgress({
           {formatCurrency(goal.currentAmount, currency, locale)}
         </span>
         <span className="text-slate-400">
-          of {formatCurrency(goal.targetAmount, currency, locale)}
+          van {formatCurrency(goal.targetAmount, currency, locale)}
         </span>
       </div>
     </div>
@@ -134,10 +134,10 @@ export function TransactionList({
         <div>
           <ReceiptText className="mx-auto size-6 text-slate-300" />
           <p className="mt-2 text-sm font-medium text-slate-600">
-            No transactions yet
+            Nog geen transacties
           </p>
           <p className="mt-1 text-xs text-slate-400">
-            Add income or spending to see it here.
+            Voeg inkomsten of uitgaven toe om ze hier te zien.
           </p>
         </div>
       </div>
@@ -207,9 +207,9 @@ export function SpendingBars({
 }) {
   const max = Math.max(income, expenses, savings, 1);
   const bars = [
-    { label: "Income", value: income, color: "bg-[var(--accent)]" },
-    { label: "Expenses", value: expenses, color: "bg-[#d8a27d]" },
-    { label: "Saved", value: savings, color: "bg-[#8097ba]" },
+    { label: "Inkomsten", value: income, color: "bg-[var(--accent)]" },
+    { label: "Uitgaven", value: expenses, color: "bg-[#d8a27d]" },
+    { label: "Gespaard", value: savings, color: "bg-[#8097ba]" },
   ];
 
   return (

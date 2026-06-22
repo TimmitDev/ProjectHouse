@@ -5,9 +5,9 @@ import { redirect } from "next/navigation";
 import { SettingsForm } from "@/components/settings/settings-form";
 import { Card, PageHeader } from "@/components/ui/card";
 import { getViewer } from "@/lib/data";
-import { getInitials } from "@/lib/utils";
+import { formatHouseholdRole, getInitials } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Settings" };
+export const metadata: Metadata = { title: "Instellingen" };
 
 export default async function SettingsPage() {
   const viewer = await getViewer();
@@ -16,9 +16,9 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-7">
       <PageHeader
-        eyebrow="Preferences"
-        title="Settings"
-        description="Manage your account, regional preferences and the color of your workspace."
+        eyebrow="Voorkeuren"
+        title="Instellingen"
+        description="Beheer je account, regionale voorkeuren en de kleur van je werkomgeving."
       />
 
       <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
@@ -36,7 +36,8 @@ export default async function SettingsPage() {
             <div className="mt-5 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5">
               <UserRound className="size-4 text-slate-400" />
               <span className="text-xs font-medium capitalize text-slate-600">
-                {viewer.household.role} of {viewer.household.name}
+                {formatHouseholdRole(viewer.household.role)} van{" "}
+                {viewer.household.name}
               </span>
             </div>
           </Card>
@@ -46,10 +47,10 @@ export default async function SettingsPage() {
               <ShieldCheck className="mt-0.5 size-5 shrink-0 text-emerald-600" />
               <div>
                 <p className="text-sm font-medium text-slate-700">
-                  Account protected
+                  Account beveiligd
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-400">
-                  Authentication is managed securely through Supabase.
+                  De authenticatie wordt veilig beheerd via Supabase.
                 </p>
               </div>
             </div>
@@ -59,10 +60,10 @@ export default async function SettingsPage() {
         <Card className="p-5 sm:p-7">
           <div className="mb-7">
             <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-              Account & appearance
+              Account en weergave
             </h2>
             <p className="mt-1 text-xs text-slate-400">
-              These preferences apply to your personal view.
+              Deze voorkeuren gelden voor jouw persoonlijke weergave.
             </p>
           </div>
           <SettingsForm profile={viewer.profile} />

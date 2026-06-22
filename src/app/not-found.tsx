@@ -12,16 +12,16 @@ export default function NotFound() {
         </span>
         <p className="mt-6 text-sm font-medium text-[var(--accent)]">404</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-          This room does not exist
+          Deze pagina bestaat niet
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          The page may have moved or the address is incorrect.
+          De pagina is mogelijk verplaatst of het adres is onjuist.
         </p>
         <Link
           href="/dashboard"
           className={buttonVariants({ className: "mt-6" })}
         >
-          Back to overview
+          Terug naar het overzicht
         </Link>
       </div>
     </main>

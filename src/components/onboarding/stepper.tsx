@@ -3,8 +3,8 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const steps = [
-  { number: 1, label: "Create account" },
-  { number: 2, label: "Your household" },
+  { number: 1, label: "Account aanmaken" },
+  { number: 2, label: "Jouw huishouden" },
   { number: 3, label: "Dashboard" },
 ];
 
@@ -16,7 +16,7 @@ export function OnboardingStepper({
   monochrome?: boolean;
 }) {
   return (
-    <ol className="mx-auto flex w-full max-w-sm items-start" aria-label="Setup">
+    <ol className="mx-auto flex w-full max-w-sm items-start" aria-label="Installatie">
       {steps.map((step, index) => {
         const complete = step.number < currentStep;
         const active = step.number === currentStep;
