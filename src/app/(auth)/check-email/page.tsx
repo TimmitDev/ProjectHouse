@@ -1,7 +1,6 @@
 import { MailCheck } from "lucide-react";
 import Link from "next/link";
 
-import { Logo } from "@/components/brand/logo";
 import { buttonVariants } from "@/components/ui/button";
 
 export default async function CheckEmailPage({
@@ -13,9 +12,6 @@ export default async function CheckEmailPage({
 
   return (
     <div className="text-center">
-      <div className="mb-10 flex justify-center lg:hidden">
-        <Logo href="/login" />
-      </div>
       <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[color-mix(in_srgb,var(--accent)_10%,white)] text-[var(--accent)]">
         <MailCheck className="size-7" />
       </div>

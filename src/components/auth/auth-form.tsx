@@ -52,7 +52,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       <Field
         label="Password"
         error={state.fieldErrors?.password?.[0]}
-        hint={!isLogin ? "Use at least 8 characters." : undefined}
       >
         <div className="relative">
           <Input
@@ -78,29 +77,21 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         </div>
       </Field>
 
-      {isLogin && (
-        <div className="flex justify-end">
-          <span className="text-xs text-slate-400">
-            Password reset via Supabase Auth
-          </span>
-        </div>
-      )}
-
       <SubmitButton
-        className="w-full"
+        className="w-full bg-black text-white hover:bg-zinc-800"
         size="lg"
         pendingLabel={isLogin ? "Signing in..." : "Creating account..."}
       >
-        {isLogin ? "Sign in" : "Create my account"}
+        {isLogin ? "Sign in" : "Create account"}
       </SubmitButton>
 
-      <p className="pt-1 text-center text-sm text-slate-500">
-        {isLogin ? "New to Nestly?" : "Already have an account?"}{" "}
+      <p className="pt-2 text-center text-sm text-zinc-500">
+        {isLogin ? "No account?" : "Already registered?"}{" "}
         <Link
           href={isLogin ? "/register" : "/login"}
-          className="font-medium text-[var(--accent)] hover:underline"
+          className="font-medium text-black underline-offset-4 hover:underline"
         >
-          {isLogin ? "Create an account" : "Sign in"}
+          {isLogin ? "Register" : "Sign in"}
         </Link>
       </p>
     </form>
