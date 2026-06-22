@@ -2,6 +2,7 @@
 
 import {
   Boxes,
+  CalendarDays,
   ChevronDown,
   Goal,
   LayoutDashboard,
@@ -124,6 +125,12 @@ export function AppShell({
             {financeOpen && (
               <div className="mt-1 space-y-1">
                 {navLink("/finances", "Samenvatting", WalletCards, true)}
+                {navLink(
+                  "/finances/agenda",
+                  "Agenda",
+                  CalendarDays,
+                  true,
+                )}
                 {navLink("/finances/goals", "Spaardoelen", Goal, true)}
               </div>
             )}

@@ -165,6 +165,45 @@ export interface Database {
         };
         Relationships: [];
       };
+      financial_agenda_items: {
+        Row: {
+          id: string;
+          household_id: string;
+          title: string;
+          category: string;
+          amount: number;
+          type: "income" | "expense";
+          due_date: string;
+          recurrence: "none" | "weekly" | "monthly" | "yearly";
+          assigned_to: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          title: string;
+          category: string;
+          amount: number;
+          type: "income" | "expense";
+          due_date: string;
+          recurrence?: "none" | "weekly" | "monthly" | "yearly";
+          assigned_to: string;
+          created_by: string;
+        };
+        Update: {
+          title?: string;
+          category?: string;
+          amount?: number;
+          type?: "income" | "expense";
+          due_date?: string;
+          recurrence?: "none" | "weekly" | "monthly" | "yearly";
+          assigned_to?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

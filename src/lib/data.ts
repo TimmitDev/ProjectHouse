@@ -1,10 +1,16 @@
 import { cookies } from "next/headers";
 
-import { demoDashboardData, demoViewer } from "@/lib/demo-data";
+import {
+  demoDashboardData,
+  demoFinancialAgendaItems,
+  demoViewer,
+} from "@/lib/demo-data";
 import { isDemoMode, isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type {
   DashboardData,
+  FinancialAgendaData,
+  FinancialAgendaItem,
   ModuleKey,
   SavingsGoal,
   Viewer,
@@ -269,5 +275,74 @@ export async function getDashboardData(
           role: member.role,
         };
       }) ?? [],
+  };
+}
+
+export async function getFinancialAgendaData(
+  viewer: Viewer,
+): Promise<FinancialAgendaData> {
+  if (viewer.isDemo) {
+    const cookieStore = await cookies();
+    const customItems = JSON.parse(
+      cookieStore.get("nestly_demo_financial_agenda")?.value || "[]",
+    ) as FinancialAgendaItem[];
+
+    return {
+      items: [...demoFinancialAgendaItems, ...customItems],
+      members: demoDashboardData.members,
+    };
+  }
+
+  if (!viewer.household) {
+    return { items: [], members: [] };
+  }
+
+  const supabase = await createClient();
+  const householdId = viewer.household.id;
+  const [{ data: agendaItems }, { data: memberships }] = await Promise.all([
+    supabase
+      .from("financial_agenda_items")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("due_date", { ascending: true }),
+    supabase
+      .from("household_members")
+      .select("user_id, role")
+      .eq("household_id", householdId),
+  ]);
+
+  const memberIds = memberships?.map((member) => member.user_id) ?? [];
+  const { data: profiles } = memberIds.length
+    ? await supabase.from("profiles").select("id, full_name").in("id", memberIds)
+    : { data: [] };
+
+  const members =
+    memberships?.map((member) => {
+      const profile = profiles?.find((row) => row.id === member.user_id);
+      return {
+        id: member.user_id,
+        name: profile?.full_name || "Huishoudlid",
+        email: member.user_id === viewer.profile.id ? viewer.profile.email : "",
+        role: member.role,
+      };
+    }) ?? [];
+
+  return {
+    items:
+      agendaItems?.map((item) => ({
+        id: item.id,
+        title: item.title,
+        category: item.category,
+        amount: numeric(item.amount),
+        type: item.type,
+        dueDate: item.due_date,
+        recurrence: item.recurrence,
+        assignedTo: item.assigned_to,
+        assignedToName:
+          members.find((member) => member.id === item.assigned_to)?.name ||
+          "Huishoudlid",
+        createdBy: item.created_by,
+      })) ?? [],
+    members,
   };
 }

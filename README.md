@@ -11,6 +11,7 @@ en Supabase.
 - Responsief dashboard met een sidebar voor mobiel en desktop
 - Modulaire functies voor het huishouden
 - Gedeeld financieel overzicht en transacties
+- Financiële agenda met toegewezen en terugkerende inkomsten en uitgaven
 - Gedeelde spaardoelen met atomaire bijdragen
 - Instellingen voor account, regio, valuta en themakleur
 - PostgreSQL Row Level Security voor huishoudgegevens

@@ -146,6 +146,7 @@ export async function logoutAction() {
       "nestly_demo_modules",
       "nestly_demo_goals",
       "nestly_demo_contributions",
+      "nestly_demo_financial_agenda",
     ].forEach((name) => cookieStore.delete(name));
   } else if (isSupabaseConfigured) {
     const supabase = await createClient();

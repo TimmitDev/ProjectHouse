@@ -52,6 +52,30 @@ export interface Transaction {
   type: "income" | "expense";
 }
 
+export type FinancialRecurrence = "none" | "weekly" | "monthly" | "yearly";
+
+export interface FinancialAgendaItem {
+  id: string;
+  title: string;
+  category: string;
+  amount: number;
+  type: "income" | "expense";
+  dueDate: string;
+  recurrence: FinancialRecurrence;
+  assignedTo: string;
+  assignedToName: string;
+  createdBy: string;
+}
+
+export interface FinancialAgendaOccurrence extends FinancialAgendaItem {
+  occurrenceDate: string;
+}
+
+export interface FinancialAgendaData {
+  items: FinancialAgendaItem[];
+  members: HouseholdMember[];
+}
+
 export interface DashboardData {
   balance: number;
   monthlyIncome: number;

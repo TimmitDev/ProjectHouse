@@ -1,5 +1,6 @@
 import type {
   DashboardData,
+  FinancialAgendaItem,
   ModuleKey,
   SavingsGoal,
   Viewer,
@@ -111,6 +112,57 @@ export const demoDashboardData: DashboardData = {
     },
   ],
 };
+
+export const demoFinancialAgendaItems: FinancialAgendaItem[] = [
+  {
+    id: "agenda-rent",
+    title: "Huur",
+    category: "Wonen",
+    amount: 1450,
+    type: "expense",
+    dueDate: "2026-01-01",
+    recurrence: "monthly",
+    assignedTo: "demo-user",
+    assignedToName: "Alex Morgan",
+    createdBy: "demo-user",
+  },
+  {
+    id: "agenda-energy",
+    title: "Energie",
+    category: "Vaste lasten",
+    amount: 142.8,
+    type: "expense",
+    dueDate: "2026-01-18",
+    recurrence: "monthly",
+    assignedTo: "demo-member",
+    assignedToName: "Jamie Morgan",
+    createdBy: "demo-user",
+  },
+  {
+    id: "agenda-salary",
+    title: "Salaris",
+    category: "Inkomsten",
+    amount: 4200,
+    type: "income",
+    dueDate: "2026-01-25",
+    recurrence: "monthly",
+    assignedTo: "demo-user",
+    assignedToName: "Alex Morgan",
+    createdBy: "demo-user",
+  },
+  {
+    id: "agenda-insurance",
+    title: "Autoverzekering",
+    category: "Vervoer",
+    amount: 83.5,
+    type: "expense",
+    dueDate: "2026-06-28",
+    recurrence: "none",
+    assignedTo: "demo-member",
+    assignedToName: "Jamie Morgan",
+    createdBy: "demo-member",
+  },
+];
 
 export const moduleCatalog: Array<{
   key: ModuleKey;
