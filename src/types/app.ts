@@ -22,6 +22,7 @@ export interface Household {
 export interface Viewer {
   profile: Profile;
   household: Household | null;
+  households: Household[];
   enabledModules: ModuleKey[];
   isDemo: boolean;
 }

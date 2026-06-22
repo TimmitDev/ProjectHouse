@@ -1,10 +1,35 @@
 import type {
   DashboardData,
   FinancialAgendaItem,
+  Household,
   ModuleKey,
   SavingsGoal,
   Viewer,
 } from "@/types/app";
+
+export const demoHouseholds: Household[] = [
+  {
+    id: "demo-household",
+    name: "Huishouden Morgan",
+    inviteCode: "NEST-4821",
+    currency: "EUR",
+    role: "owner",
+  },
+  {
+    id: "demo-household-cabin",
+    name: "Het Boshuis",
+    inviteCode: "BOS-1974",
+    currency: "EUR",
+    role: "admin",
+  },
+  {
+    id: "demo-household-studio",
+    name: "Studio aan de Gracht",
+    inviteCode: "GRACHT-8",
+    currency: "EUR",
+    role: "member",
+  },
+];
 
 export const demoViewer: Viewer = {
   profile: {
@@ -15,13 +40,8 @@ export const demoViewer: Viewer = {
     currency: "EUR",
     accentColor: "#52796F",
   },
-  household: {
-    id: "demo-household",
-    name: "Huishouden Morgan",
-    inviteCode: "NEST-4821",
-    currency: "EUR",
-    role: "owner",
-  },
+  household: demoHouseholds[0],
+  households: demoHouseholds,
   enabledModules: ["finances"],
   isDemo: true,
 };

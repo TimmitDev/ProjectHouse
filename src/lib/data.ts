@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import {
   demoDashboardData,
   demoFinancialAgendaItems,
+  demoHouseholds,
   demoViewer,
 } from "@/lib/demo-data";
 import { isDemoMode, isSupabaseConfigured } from "@/lib/env";
@@ -31,6 +32,14 @@ async function getDemoViewer(): Promise<Viewer | null> {
   const enabledModules = cookieStore.get("nestly_demo_modules")?.value
     ?.split(",")
     .filter(Boolean) as ModuleKey[] | undefined;
+  const households = hasHousehold ? demoHouseholds : [];
+  const activeHouseholdId = cookieStore.get(
+    "nestly_active_household",
+  )?.value;
+  const activeHousehold =
+    households.find((item) => item.id === activeHouseholdId) ??
+    households[0] ??
+    null;
 
   return {
     ...demoViewer,
@@ -49,7 +58,8 @@ async function getDemoViewer(): Promise<Viewer | null> {
         cookieStore.get("nestly_demo_currency")?.value ||
         demoViewer.profile.currency,
     },
-    household: hasHousehold ? demoViewer.household : null,
+    household: activeHousehold,
+    households,
     enabledModules: enabledModules?.length ? enabledModules : ["finances"],
   };
 }
@@ -72,44 +82,62 @@ export async function getViewer(): Promise<Viewer | null> {
     return null;
   }
 
-  const [{ data: profile }, { data: membership }] = await Promise.all([
+  const [{ data: profile }, { data: memberships }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase
       .from("household_members")
       .select("household_id, role")
-      .eq("user_id", user.id)
-      .maybeSingle(),
+      .eq("user_id", user.id),
   ]);
 
   let household: Viewer["household"] = null;
+  let households: Viewer["households"] = [];
   let enabledModules: ModuleKey[] = [];
 
-  if (membership) {
-    const [{ data: householdRow }, { data: moduleRows }] = await Promise.all([
-      supabase
-        .from("households")
-        .select("id, name, invite_code, currency")
-        .eq("id", membership.household_id)
-        .single(),
-      supabase
+  if (memberships?.length) {
+    const householdIds = memberships.map((item) => item.household_id);
+    const { data: householdRows } = await supabase
+      .from("households")
+      .select("id, name, invite_code, currency")
+      .in("id", householdIds);
+
+    households =
+      memberships.flatMap((membership) => {
+        const row = householdRows?.find(
+          (item) => item.id === membership.household_id,
+        );
+        return row
+          ? [
+              {
+                id: row.id,
+                name: row.name,
+                inviteCode: row.invite_code,
+                currency: row.currency,
+                role: membership.role,
+              },
+            ]
+          : [];
+      }) ?? [];
+
+    const cookieStore = await cookies();
+    const activeHouseholdId = cookieStore.get(
+      "nestly_active_household",
+    )?.value;
+    household =
+      households.find((item) => item.id === activeHouseholdId) ??
+      households[0] ??
+      null;
+
+    if (household) {
+      const { data: moduleRows } = await supabase
         .from("household_modules")
         .select("module_key, enabled")
-        .eq("household_id", membership.household_id)
-        .eq("enabled", true),
-    ]);
+        .eq("household_id", household.id)
+        .eq("enabled", true);
 
-    if (householdRow) {
-      household = {
-        id: householdRow.id,
-        name: householdRow.name,
-        inviteCode: householdRow.invite_code,
-        currency: householdRow.currency,
-        role: membership.role,
-      };
+      enabledModules =
+        moduleRows?.map((row) => row.module_key as ModuleKey) ?? [];
     }
-
-    enabledModules =
-      moduleRows?.map((row) => row.module_key as ModuleKey) ?? [];
   }
 
   return {
@@ -124,6 +152,7 @@ export async function getViewer(): Promise<Viewer | null> {
       accentColor: profile?.accent_color ?? "#52796F",
     },
     household,
+    households,
     enabledModules,
     isDemo: false,
   };
