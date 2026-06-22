@@ -12,6 +12,7 @@ import type {
   DashboardData,
   FinancialAgendaData,
   FinancialAgendaItem,
+  Household,
   ModuleKey,
   SavingsGoal,
   Viewer,
@@ -32,7 +33,12 @@ async function getDemoViewer(): Promise<Viewer | null> {
   const enabledModules = cookieStore.get("nestly_demo_modules")?.value
     ?.split(",")
     .filter(Boolean) as ModuleKey[] | undefined;
-  const households = hasHousehold ? demoHouseholds : [];
+  const customHouseholds = JSON.parse(
+    cookieStore.get("nestly_demo_households")?.value || "[]",
+  ) as Household[];
+  const households = hasHousehold
+    ? [...demoHouseholds, ...customHouseholds]
+    : [];
   const activeHouseholdId = cookieStore.get(
     "nestly_active_household",
   )?.value;

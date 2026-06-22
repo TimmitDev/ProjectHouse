@@ -211,6 +211,10 @@ export interface Database {
         Args: { household_name: string; household_currency: string };
         Returns: string;
       };
+      create_additional_household: {
+        Args: { household_name: string; household_currency: string };
+        Returns: string;
+      };
       join_household: {
         Args: { household_code: string };
         Returns: string;

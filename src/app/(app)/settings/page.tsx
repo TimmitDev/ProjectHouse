@@ -1,13 +1,13 @@
-import { ShieldCheck, UserRound } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { SettingsForm } from "@/components/settings/settings-form";
 import { Card, PageHeader } from "@/components/ui/card";
 import { getViewer } from "@/lib/data";
-import { formatHouseholdRole, getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Instellingen" };
+export const metadata: Metadata = { title: "Account en thema" };
 
 export default async function SettingsPage() {
   const viewer = await getViewer();
@@ -16,9 +16,9 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-7">
       <PageHeader
-        eyebrow="Voorkeuren"
-        title="Instellingen"
-        description="Beheer je account, regionale voorkeuren en de kleur van je werkomgeving."
+        eyebrow="Persoonlijk"
+        title="Account en thema"
+        description="Beheer alleen je persoonlijke profiel, regionale voorkeuren en de uitstraling van je app."
       />
 
       <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
@@ -33,13 +33,6 @@ export default async function SettingsPage() {
             <p className="mt-1 truncate text-xs text-slate-400">
               {viewer.profile.email}
             </p>
-            <div className="mt-5 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5">
-              <UserRound className="size-4 text-slate-400" />
-              <span className="text-xs font-medium capitalize text-slate-600">
-                {formatHouseholdRole(viewer.household.role)} van{" "}
-                {viewer.household.name}
-              </span>
-            </div>
           </Card>
 
           <Card className="p-5">

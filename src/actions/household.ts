@@ -7,6 +7,7 @@ import { z } from "zod";
 import { isDemoMode, isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/types/app";
+import type { Household } from "@/types/app";
 
 const createSchema = z.object({
   householdName: z.string().trim().min(2, "Vul een huishoudnaam in.").max(60),
@@ -67,6 +68,84 @@ export async function createHouseholdAction(
         ? "Je bent al lid van een huishouden."
         : "Het huishouden kon niet worden aangemaakt.",
     };
+  }
+
+  redirect("/dashboard");
+}
+
+export async function createAdditionalHouseholdAction(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = createSchema.safeParse({
+    householdName: formData.get("householdName"),
+    currency: formData.get("currency"),
+  });
+
+  if (!parsed.success) {
+    return {
+      error: "Controleer de gegevens van het huishouden.",
+      fieldErrors: z.flattenError(parsed.error).fieldErrors,
+    };
+  }
+
+  let householdId: string;
+
+  if (isDemoMode) {
+    const cookieStore = await cookies();
+    const households = JSON.parse(
+      cookieStore.get("nestly_demo_households")?.value || "[]",
+    ) as Household[];
+    householdId = crypto.randomUUID();
+    households.push({
+      id: householdId,
+      name: parsed.data.householdName,
+      inviteCode: `NEST-${crypto.randomUUID().slice(0, 6).toUpperCase()}`,
+      currency: parsed.data.currency.toUpperCase(),
+      role: "owner",
+    });
+
+    const options = {
+      httpOnly: true,
+      sameSite: "lax" as const,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    };
+    cookieStore.set(
+      "nestly_demo_households",
+      JSON.stringify(households),
+      options,
+    );
+    cookieStore.set("nestly_demo_household", "1", options);
+    cookieStore.set("nestly_active_household", householdId, options);
+  } else {
+    if (!isSupabaseConfigured) {
+      return { error: "Supabase is niet geconfigureerd." };
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc(
+      "create_additional_household",
+      {
+        household_name: parsed.data.householdName,
+        household_currency: parsed.data.currency,
+      },
+    );
+
+    if (error || !data) {
+      return { error: "Het huishouden kon niet worden aangemaakt." };
+    }
+
+    householdId = data;
+    const cookieStore = await cookies();
+    cookieStore.set("nestly_active_household", householdId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
   }
 
   redirect("/dashboard");
