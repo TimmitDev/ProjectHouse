@@ -1,0 +1,273 @@
+import { cookies } from "next/headers";
+
+import { demoDashboardData, demoViewer } from "@/lib/demo-data";
+import { isDemoMode, isSupabaseConfigured } from "@/lib/env";
+import { createClient } from "@/lib/supabase/server";
+import type {
+  DashboardData,
+  ModuleKey,
+  SavingsGoal,
+  Viewer,
+} from "@/types/app";
+
+function numeric(value: number | string | null | undefined) {
+  return Number(value ?? 0);
+}
+
+async function getDemoViewer(): Promise<Viewer | null> {
+  const cookieStore = await cookies();
+
+  if (!cookieStore.has("nestly_demo_session")) {
+    return null;
+  }
+
+  const hasHousehold = cookieStore.has("nestly_demo_household");
+  const enabledModules = cookieStore.get("nestly_demo_modules")?.value
+    ?.split(",")
+    .filter(Boolean) as ModuleKey[] | undefined;
+
+  return {
+    ...demoViewer,
+    profile: {
+      ...demoViewer.profile,
+      fullName:
+        cookieStore.get("nestly_demo_name")?.value ||
+        demoViewer.profile.fullName,
+      accentColor:
+        cookieStore.get("nestly_demo_accent")?.value ||
+        demoViewer.profile.accentColor,
+      locale:
+        cookieStore.get("nestly_demo_locale")?.value ||
+        demoViewer.profile.locale,
+      currency:
+        cookieStore.get("nestly_demo_currency")?.value ||
+        demoViewer.profile.currency,
+    },
+    household: hasHousehold ? demoViewer.household : null,
+    enabledModules: enabledModules?.length ? enabledModules : ["finances"],
+  };
+}
+
+export async function getViewer(): Promise<Viewer | null> {
+  if (isDemoMode) {
+    return getDemoViewer();
+  }
+
+  if (!isSupabaseConfigured) {
+    return null;
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const [{ data: profile }, { data: membership }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("household_members")
+      .select("household_id, role")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  ]);
+
+  let household: Viewer["household"] = null;
+  let enabledModules: ModuleKey[] = [];
+
+  if (membership) {
+    const [{ data: householdRow }, { data: moduleRows }] = await Promise.all([
+      supabase
+        .from("households")
+        .select("id, name, invite_code, currency")
+        .eq("id", membership.household_id)
+        .single(),
+      supabase
+        .from("household_modules")
+        .select("module_key, enabled")
+        .eq("household_id", membership.household_id)
+        .eq("enabled", true),
+    ]);
+
+    if (householdRow) {
+      household = {
+        id: householdRow.id,
+        name: householdRow.name,
+        inviteCode: householdRow.invite_code,
+        currency: householdRow.currency,
+        role: membership.role,
+      };
+    }
+
+    enabledModules =
+      moduleRows?.map((row) => row.module_key as ModuleKey) ?? [];
+  }
+
+  return {
+    profile: {
+      id: user.id,
+      fullName:
+        profile?.full_name ||
+        String(user.user_metadata.full_name ?? user.email?.split("@")[0] ?? ""),
+      email: user.email ?? "",
+      locale: profile?.locale ?? "en-US",
+      currency: profile?.currency ?? "EUR",
+      accentColor: profile?.accent_color ?? "#52796F",
+    },
+    household,
+    enabledModules,
+    isDemo: false,
+  };
+}
+
+async function getDemoDashboardData(): Promise<DashboardData> {
+  const cookieStore = await cookies();
+  const contributions = JSON.parse(
+    cookieStore.get("nestly_demo_contributions")?.value || "{}",
+  ) as Record<string, number>;
+  const customGoals = JSON.parse(
+    cookieStore.get("nestly_demo_goals")?.value || "[]",
+  ) as SavingsGoal[];
+
+  return {
+    ...demoDashboardData,
+    goals: [...demoDashboardData.goals, ...customGoals].map((goal) => ({
+      ...goal,
+      currentAmount:
+        goal.currentAmount + numeric(contributions[goal.id] ?? 0),
+    })),
+  };
+}
+
+export async function getDashboardData(
+  viewer: Viewer,
+): Promise<DashboardData> {
+  if (viewer.isDemo) {
+    return getDemoDashboardData();
+  }
+
+  if (!viewer.household) {
+    return {
+      balance: 0,
+      monthlyIncome: 0,
+      monthlyExpenses: 0,
+      monthlySavings: 0,
+      savingsRate: 0,
+      goals: [],
+      transactions: [],
+      members: [],
+    };
+  }
+
+  const supabase = await createClient();
+  const householdId = viewer.household.id;
+  const now = new Date();
+  const monthStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+  )
+    .toISOString()
+    .slice(0, 10);
+
+  const [
+    { data: goals },
+    { data: recentTransactions },
+    { data: allTransactions },
+    { data: memberships },
+  ] = await Promise.all([
+    supabase
+      .from("savings_goals")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("transactions")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("transaction_date", { ascending: false })
+      .limit(8),
+    supabase
+      .from("transactions")
+      .select("amount, type, transaction_date")
+      .eq("household_id", householdId),
+    supabase
+      .from("household_members")
+      .select("user_id, role")
+      .eq("household_id", householdId),
+  ]);
+
+  const memberIds = memberships?.map((member) => member.user_id) ?? [];
+  const { data: profiles } = memberIds.length
+    ? await supabase.from("profiles").select("id, full_name").in("id", memberIds)
+    : { data: [] };
+
+  const monthly = allTransactions?.filter(
+    (transaction) => transaction.transaction_date >= monthStart,
+  );
+  const monthlyIncome =
+    monthly
+      ?.filter((transaction) => transaction.type === "income")
+      .reduce((total, transaction) => total + numeric(transaction.amount), 0) ??
+    0;
+  const monthlyExpenses =
+    monthly
+      ?.filter((transaction) => transaction.type === "expense")
+      .reduce((total, transaction) => total + numeric(transaction.amount), 0) ??
+    0;
+  const totalIncome =
+    allTransactions
+      ?.filter((transaction) => transaction.type === "income")
+      .reduce((total, transaction) => total + numeric(transaction.amount), 0) ??
+    0;
+  const totalExpenses =
+    allTransactions
+      ?.filter((transaction) => transaction.type === "expense")
+      .reduce((total, transaction) => total + numeric(transaction.amount), 0) ??
+    0;
+
+  return {
+    balance: totalIncome - totalExpenses,
+    monthlyIncome,
+    monthlyExpenses,
+    monthlySavings: Math.max(0, monthlyIncome - monthlyExpenses),
+    savingsRate:
+      monthlyIncome > 0
+        ? Math.round(
+            ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100,
+          )
+        : 0,
+    goals:
+      goals?.map((goal) => ({
+        id: goal.id,
+        name: goal.name,
+        targetAmount: numeric(goal.target_amount),
+        currentAmount: numeric(goal.current_amount),
+        deadline: goal.deadline,
+        color: goal.color,
+        icon: goal.icon,
+      })) ?? [],
+    transactions:
+      recentTransactions?.map((transaction) => ({
+        id: transaction.id,
+        description: transaction.description,
+        category: transaction.category,
+        amount: numeric(transaction.amount),
+        transactionDate: transaction.transaction_date,
+        type: transaction.type,
+      })) ?? [],
+    members:
+      memberships?.map((member) => {
+        const profile = profiles?.find(
+          (profileRow) => profileRow.id === member.user_id,
+        );
+        return {
+          id: member.user_id,
+          name: profile?.full_name || "Household member",
+          email: member.user_id === viewer.profile.id ? viewer.profile.email : "",
+          role: member.role,
+        };
+      }) ?? [],
+  };
+}
