@@ -215,18 +215,18 @@ export default async function FinancialAgendaPage({
         </Card>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <Card className="overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
-            <div>
+      <section className="grid min-w-0 gap-5 2xl:grid-cols-[minmax(0,1fr)_360px]">
+        <Card className="min-w-0 overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-6">
+            <div className="min-w-0">
               <h2 className="font-semibold capitalize tracking-[-0.02em] text-slate-900">
                 {monthLabel}
               </h2>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="mt-0.5 hidden text-xs text-slate-400 sm:block">
                 Alle geplande bedragen per dag
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <Link
                 href={`/finances/agenda?month=${shiftMonth(month.key, -1)}`}
                 className="grid size-9 place-items-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
@@ -250,85 +250,101 @@ export default async function FinancialAgendaPage({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <div className="min-w-[760px]">
-              <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/60">
-                {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((day) => (
-                  <div
-                    key={day}
-                    className="px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400"
-                  >
-                    {day}
-                  </div>
-                ))}
+          <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/60">
+            {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((day) => (
+              <div
+                key={day}
+                className="min-w-0 px-0.5 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.04em] text-slate-400 sm:px-3 sm:text-[11px] sm:tracking-[0.08em]"
+              >
+                {day}
               </div>
-              <div className="grid grid-cols-7">
-                {calendarDates.map((date, index) => {
-                  const dayOccurrences = calendarOccurrences.filter(
-                    (occurrence) => occurrence.occurrenceDate === date,
-                  );
-                  const inMonth = date.startsWith(month.key);
-                  const isToday =
-                    date === new Date().toISOString().slice(0, 10);
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {calendarDates.map((date, index) => {
+              const dayOccurrences = calendarOccurrences.filter(
+                (occurrence) => occurrence.occurrenceDate === date,
+              );
+              const inMonth = date.startsWith(month.key);
+              const isToday =
+                date === new Date().toISOString().slice(0, 10);
 
-                  return (
-                    <div
-                      key={date}
-                      className={cn(
-                        "min-h-28 border-b border-r border-slate-100 p-2.5",
-                        index % 7 === 6 && "border-r-0",
-                        !inMonth && "bg-slate-50/40",
-                      )}
-                    >
+              return (
+                <div
+                  key={date}
+                  className={cn(
+                    "min-h-[72px] min-w-0 border-b border-r border-slate-100 p-1 sm:min-h-28 sm:p-2 lg:p-2.5",
+                    index % 7 === 6 && "border-r-0",
+                    !inMonth && "bg-slate-50/40",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "grid size-6 place-items-center rounded-full text-[11px] font-medium sm:size-7 sm:text-xs",
+                      inMonth ? "text-slate-600" : "text-slate-300",
+                      isToday &&
+                        "bg-[var(--accent)] font-semibold text-white",
+                    )}
+                  >
+                    {Number(date.slice(-2))}
+                  </span>
+
+                  <div className="mt-1 flex flex-wrap gap-1 sm:hidden">
+                    {dayOccurrences.slice(0, 4).map((occurrence) => (
                       <span
+                        key={`${occurrence.id}-${date}`}
                         className={cn(
-                          "grid size-7 place-items-center rounded-full text-xs font-medium",
-                          inMonth ? "text-slate-600" : "text-slate-300",
-                          isToday &&
-                            "bg-[var(--accent)] font-semibold text-white",
+                          "size-1.5 rounded-full",
+                          occurrence.type === "income"
+                            ? "bg-emerald-500"
+                            : "bg-orange-400",
                         )}
+                        title={`${occurrence.title} · ${formatCurrency(
+                          occurrence.amount,
+                          currency,
+                          locale,
+                        )}`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-1.5 hidden min-w-0 space-y-1 sm:block">
+                    {dayOccurrences.slice(0, 3).map((occurrence) => (
+                      <div
+                        key={`${occurrence.id}-${date}`}
+                        className={cn(
+                          "min-w-0 rounded-md px-1.5 py-1 text-[10px] leading-4 lg:px-2",
+                          occurrence.type === "income"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-orange-50 text-orange-700",
+                        )}
+                        title={`${occurrence.title} · ${occurrence.assignedToName}`}
                       >
-                        {Number(date.slice(-2))}
-                      </span>
-                      <div className="mt-1.5 space-y-1">
-                        {dayOccurrences.slice(0, 3).map((occurrence) => (
-                          <div
-                            key={`${occurrence.id}-${date}`}
-                            className={cn(
-                              "rounded-md px-2 py-1 text-[10px] leading-4",
-                              occurrence.type === "income"
-                                ? "bg-emerald-50 text-emerald-700"
-                                : "bg-orange-50 text-orange-700",
-                            )}
-                            title={`${occurrence.title} · ${occurrence.assignedToName}`}
-                          >
-                            <p className="truncate font-semibold">
-                              {occurrence.title}
-                            </p>
-                            <p className="truncate opacity-80">
-                              {formatCurrency(
-                                occurrence.amount,
-                                currency,
-                                locale,
-                              )}
-                            </p>
-                          </div>
-                        ))}
-                        {dayOccurrences.length > 3 && (
-                          <p className="px-1 text-[10px] font-medium text-slate-400">
-                            +{dayOccurrences.length - 3} meer
-                          </p>
-                        )}
+                        <p className="truncate font-semibold">
+                          {occurrence.title}
+                        </p>
+                        <p className="hidden truncate opacity-80 md:block">
+                          {formatCurrency(
+                            occurrence.amount,
+                            currency,
+                            locale,
+                          )}
+                        </p>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                    ))}
+                    {dayOccurrences.length > 3 && (
+                      <p className="truncate px-1 text-[10px] font-medium text-slate-400">
+                        +{dayOccurrences.length - 3} meer
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
 
-        <Card className="self-start p-5">
+        <Card className="min-w-0 self-start p-5">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
