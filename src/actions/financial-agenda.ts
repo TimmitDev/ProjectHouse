@@ -19,6 +19,7 @@ const agendaItemSchema = z.object({
   type: z.enum(["income", "expense"]),
   dueDate: z.iso.date(),
   recurrence: z.enum(["none", "weekly", "monthly", "yearly"]),
+  budgetMonthOffset: z.coerce.number().int().min(0).max(1),
   assignedTo: z.string().min(1, "Kies een huishoudlid."),
 });
 
@@ -33,6 +34,7 @@ export async function createFinancialAgendaItemAction(
     type: formData.get("type"),
     dueDate: formData.get("dueDate"),
     recurrence: formData.get("recurrence"),
+    budgetMonthOffset: formData.get("budgetMonthOffset") || 0,
     assignedTo: formData.get("assignedTo"),
   });
 
@@ -70,6 +72,7 @@ export async function createFinancialAgendaItemAction(
       type: parsed.data.type,
       dueDate: parsed.data.dueDate,
       recurrence: parsed.data.recurrence,
+      budgetMonthOffset: parsed.data.budgetMonthOffset as 0 | 1,
       assignedTo: parsed.data.assignedTo,
       assignedToName: assignedMember.name,
       createdBy: viewer.profile.id,
@@ -106,6 +109,7 @@ export async function createFinancialAgendaItemAction(
       type: parsed.data.type,
       due_date: parsed.data.dueDate,
       recurrence: parsed.data.recurrence,
+      budget_month_offset: parsed.data.budgetMonthOffset,
       assigned_to: parsed.data.assignedTo,
       created_by: viewer.profile.id,
     });

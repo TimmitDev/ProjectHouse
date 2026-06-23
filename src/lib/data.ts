@@ -81,6 +81,7 @@ type FinancialAgendaRpc = {
     type: FinancialAgendaItem["type"];
     due_date: string;
     recurrence: FinancialAgendaItem["recurrence"];
+    budget_month_offset?: number;
     assigned_to: string;
     assigned_to_name: string;
     created_by: string;
@@ -597,9 +598,14 @@ function filterDemoAgendaItems(
   rangeStart: string | null,
   rangeEnd: string | null,
 ) {
-  if (!rangeStart && !rangeEnd) return items;
+  const normalizedItems = items.map((item) => ({
+    ...item,
+    budgetMonthOffset: item.budgetMonthOffset === 1 ? 1 : 0,
+  })) as FinancialAgendaItem[];
 
-  return items.filter(
+  if (!rangeStart && !rangeEnd) return normalizedItems;
+
+  return normalizedItems.filter(
     (item) =>
       (!rangeEnd || item.dueDate <= rangeEnd) &&
       (item.recurrence !== "none" ||
@@ -660,6 +666,8 @@ const getFinancialAgendaDataCached = cache(
             type: item.type,
             dueDate: item.due_date,
             recurrence: item.recurrence,
+            budgetMonthOffset:
+              item.budget_month_offset === 1 ? 1 : 0,
             assignedTo: item.assigned_to,
             assignedToName: item.assigned_to_name,
             createdBy: item.created_by,
@@ -679,7 +687,7 @@ const getFinancialAgendaDataCached = cache(
       supabase
         .from("financial_agenda_items")
         .select(
-          "id, title, category, amount, type, due_date, recurrence, assigned_to, created_by",
+          "id, title, category, amount, type, due_date, recurrence, budget_month_offset, assigned_to, created_by",
         )
         .eq("household_id", viewer.household.id)
         .order("due_date", { ascending: true }),
@@ -717,6 +725,8 @@ const getFinancialAgendaDataCached = cache(
           type: item.type,
           dueDate: item.due_date,
           recurrence: item.recurrence,
+          budgetMonthOffset:
+            item.budget_month_offset === 1 ? 1 : 0,
           assignedTo: item.assigned_to,
           assignedToName:
             members.find((member) => member.id === item.assigned_to)?.name ||

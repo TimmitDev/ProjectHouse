@@ -14,6 +14,18 @@ function toDateOnly(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
+function budgetMonthForDate(date: Date, monthOffset: 0 | 1) {
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth() + monthOffset,
+      1,
+    ),
+  )
+    .toISOString()
+    .slice(0, 7);
+}
+
 function daysInMonth(year: number, monthIndex: number) {
   return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
 }
@@ -100,7 +112,14 @@ export function expandFinancialAgendaItems(
     if (item.recurrence === "none") {
       const dueDate = parseDateOnly(item.dueDate);
       if (dueDate >= start && dueDate <= end) {
-        occurrences.push({ ...item, occurrenceDate: item.dueDate });
+        occurrences.push({
+          ...item,
+          occurrenceDate: item.dueDate,
+          budgetMonth: budgetMonthForDate(
+            dueDate,
+            item.budgetMonthOffset,
+          ),
+        });
       }
       continue;
     }
@@ -111,7 +130,14 @@ export function expandFinancialAgendaItems(
       const date = occurrenceAt(item, index);
       if (date > end) break;
       if (date >= start) {
-        occurrences.push({ ...item, occurrenceDate: toDateOnly(date) });
+        occurrences.push({
+          ...item,
+          occurrenceDate: toDateOnly(date),
+          budgetMonth: budgetMonthForDate(
+            date,
+            item.budgetMonthOffset,
+          ),
+        });
       }
     }
   }

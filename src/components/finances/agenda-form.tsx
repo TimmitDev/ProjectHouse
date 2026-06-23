@@ -116,6 +116,16 @@ export function AddFinancialAgendaItemButton({
               </Select>
             </Field>
           </div>
+          <Field
+            label="Voor welke maand telt dit bedrag?"
+            error={state.fieldErrors?.budgetMonthOffset?.[0]}
+            hint="Handig voor salaris dat aan het einde van de vorige maand wordt uitbetaald."
+          >
+            <Select name="budgetMonthOffset" defaultValue="0">
+              <option value="0">De maand van de betaaldatum</option>
+              <option value="1">De volgende maand</option>
+            </Select>
+          </Field>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setOpen(false)}>
               Annuleren

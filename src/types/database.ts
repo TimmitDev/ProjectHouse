@@ -175,6 +175,7 @@ export interface Database {
           type: "income" | "expense";
           due_date: string;
           recurrence: "none" | "weekly" | "monthly" | "yearly";
+          budget_month_offset: number;
           assigned_to: string;
           created_by: string;
           created_at: string;
@@ -189,6 +190,7 @@ export interface Database {
           type: "income" | "expense";
           due_date: string;
           recurrence?: "none" | "weekly" | "monthly" | "yearly";
+          budget_month_offset?: number;
           assigned_to: string;
           created_by: string;
         };
@@ -199,6 +201,7 @@ export interface Database {
           type?: "income" | "expense";
           due_date?: string;
           recurrence?: "none" | "weekly" | "monthly" | "yearly";
+          budget_month_offset?: number;
           assigned_to?: string;
           updated_at?: string;
         };

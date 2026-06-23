@@ -54,6 +54,18 @@ function formatAgendaDate(value: string, locale: string) {
   return formatter.format(new Date(`${value}T00:00:00Z`));
 }
 
+function formatBudgetMonth(
+  value: string,
+  locale: string,
+  includeYear = true,
+) {
+  return new Intl.DateTimeFormat(locale, {
+    month: includeYear ? "long" : "short",
+    year: includeYear ? "numeric" : undefined,
+    timeZone: "UTC",
+  }).format(new Date(`${value}-01T00:00:00Z`));
+}
+
 function AgendaListItem({
   occurrence,
   currency,
@@ -88,7 +100,7 @@ function AgendaListItem({
               {occurrence.title}
             </p>
             <p className="mt-0.5 text-xs text-slate-400">
-              {formatAgendaDate(occurrence.occurrenceDate, locale)} ·{" "}
+              Betaald {formatAgendaDate(occurrence.occurrenceDate, locale)} ·{" "}
               {occurrence.category}
             </p>
           </div>
@@ -113,6 +125,12 @@ function AgendaListItem({
               {recurrenceLabels[occurrence.recurrence]}
             </span>
           )}
+          {occurrence.budgetMonthOffset === 1 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 font-medium capitalize text-emerald-700">
+              <CalendarDays className="size-3" />
+              Voor {formatBudgetMonth(occurrence.budgetMonth, locale)}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -133,11 +151,21 @@ export default async function FinancialAgendaPage({
     params.month || new Date().toISOString().slice(0, 7);
   const month = getMonthRange(requestedMonth);
   const calendarRange = getCalendarRange(month.key);
-  const data = await getFinancialAgendaData(viewer, calendarRange);
-  const calendarOccurrences = expandFinancialAgendaItems(
+  const previousMonth = getMonthRange(shiftMonth(month.key, -1));
+  const agendaRange = {
+    start: previousMonth.start,
+    end: calendarRange.end,
+  };
+  const data = await getFinancialAgendaData(viewer, agendaRange);
+  const allOccurrences = expandFinancialAgendaItems(
     data.items,
-    calendarRange.start,
-    calendarRange.end,
+    agendaRange.start,
+    agendaRange.end,
+  );
+  const calendarOccurrences = allOccurrences.filter(
+    (occurrence) =>
+      occurrence.occurrenceDate >= calendarRange.start &&
+      occurrence.occurrenceDate <= calendarRange.end,
   );
   const occurrencesByDate = new Map<
     string,
@@ -149,10 +177,8 @@ export default async function FinancialAgendaPage({
     dayOccurrences.push(occurrence);
     occurrencesByDate.set(occurrence.occurrenceDate, dayOccurrences);
   }
-  const monthOccurrences = calendarOccurrences.filter(
-    (occurrence) =>
-      occurrence.occurrenceDate >= month.start &&
-      occurrence.occurrenceDate <= month.end,
+  const monthOccurrences = allOccurrences.filter(
+    (occurrence) => occurrence.budgetMonth === month.key,
   );
   const calendarDates = eachDate(calendarRange.start, calendarRange.end);
   const { currency, locale } = viewer.profile;
@@ -321,7 +347,14 @@ export default async function FinancialAgendaPage({
                           occurrence.amount,
                           currency,
                           locale,
-                        )}`}
+                        )}${
+                          occurrence.budgetMonthOffset === 1
+                            ? ` · voor ${formatBudgetMonth(
+                                occurrence.budgetMonth,
+                                locale,
+                              )}`
+                            : ""
+                        }`}
                       />
                     ))}
                   </div>
@@ -348,6 +381,16 @@ export default async function FinancialAgendaPage({
                             locale,
                           )}
                         </p>
+                        {occurrence.budgetMonthOffset === 1 && (
+                          <p className="hidden truncate opacity-70 lg:block">
+                            voor{" "}
+                            {formatBudgetMonth(
+                              occurrence.budgetMonth,
+                              locale,
+                              false,
+                            )}
+                          </p>
+                        )}
                       </div>
                     ))}
                     {dayOccurrences.length > 3 && (

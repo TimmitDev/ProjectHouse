@@ -63,6 +63,7 @@ export interface FinancialAgendaItem {
   type: "income" | "expense";
   dueDate: string;
   recurrence: FinancialRecurrence;
+  budgetMonthOffset: 0 | 1;
   assignedTo: string;
   assignedToName: string;
   createdBy: string;
@@ -70,6 +71,7 @@ export interface FinancialAgendaItem {
 
 export interface FinancialAgendaOccurrence extends FinancialAgendaItem {
   occurrenceDate: string;
+  budgetMonth: string;
 }
 
 export interface FinancialAgendaData {
