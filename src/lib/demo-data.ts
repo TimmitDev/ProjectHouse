@@ -3,6 +3,7 @@ import type {
   FinancialAgendaItem,
   GroceryItem,
   Household,
+  MealPrepRecipe,
   ModuleKey,
   SavingsGoal,
   Viewer,
@@ -232,6 +233,51 @@ export const demoGroceryItems: GroceryItem[] = [
   },
 ];
 
+export const demoMealPrepRecipes: MealPrepRecipe[] = [
+  {
+    id: "meal-pasta-pesto",
+    name: "Pasta pesto met groenten",
+    description: "Een snelle doordeweekse maaltijd die goed opnieuw opwarmt.",
+    ingredients: [
+      "300 g pasta",
+      "1 courgette",
+      "250 g cherrytomaten",
+      "4 el groene pesto",
+      "Parmezaanse kaas",
+    ],
+    instructions:
+      "Kook de pasta. Bak de courgette en tomaten kort, meng alles met de pesto en werk af met Parmezaanse kaas.",
+    servings: 4,
+    prepMinutes: 25,
+    storageMethod: "fridge",
+    shelfLifeDays: 3,
+    lastPreparedAt: "2026-06-22T17:30:00.000Z",
+    createdBy: "demo-user",
+    createdAt: "2026-06-10T10:00:00.000Z",
+  },
+  {
+    id: "meal-chili",
+    name: "Vegetarische chili",
+    description: "Rijk, stevig en ideaal om in porties in te vriezen.",
+    ingredients: [
+      "2 blikken kidneybonen",
+      "1 blik mais",
+      "2 paprika's",
+      "400 g tomatenblokjes",
+      "Chilipoeder en komijn",
+    ],
+    instructions:
+      "Fruit de groenten en kruiden. Voeg bonen, mais en tomaten toe en laat 25 minuten zacht koken.",
+    servings: 6,
+    prepMinutes: 40,
+    storageMethod: "freezer",
+    shelfLifeDays: 90,
+    lastPreparedAt: null,
+    createdBy: "demo-member",
+    createdAt: "2026-06-08T12:00:00.000Z",
+  },
+];
+
 export const moduleCatalog: Array<{
   key: ModuleKey;
   name: string;
@@ -263,7 +309,7 @@ export const moduleCatalog: Array<{
   {
     key: "groceries",
     name: "Boodschappen",
-    description: "Maak samen één actuele boodschappenlijst.",
+    description: "Maak samen een actuele lijst en bewaar mealprep-gerechten.",
     icon: "shopping",
     available: true,
   },

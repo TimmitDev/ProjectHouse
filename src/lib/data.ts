@@ -5,6 +5,7 @@ import {
   demoDashboardData,
   demoFinancialAgendaItems,
   demoGroceryItems,
+  demoMealPrepRecipes,
   demoHouseholds,
   demoViewer,
 } from "@/lib/demo-data";
@@ -18,6 +19,7 @@ import type {
   Household,
   HouseholdMember,
   ModuleKey,
+  MealPrepRecipe,
   SavingsGoal,
   Transaction,
   Viewer,
@@ -789,6 +791,65 @@ export const getGroceryItems = cache(
         completedBy: item.completed_by,
         completedAt: item.completed_at,
         createdAt: item.created_at,
+      })) ?? []
+    );
+  },
+);
+
+type DemoMealPrepLists = Record<string, MealPrepRecipe[]>;
+
+export const getMealPrepRecipes = cache(
+  async (viewer: Viewer): Promise<MealPrepRecipe[]> => {
+    if (!viewer.household) return [];
+
+    if (viewer.isDemo) {
+      const cookieStore = await cookies();
+      const raw = cookieStore.get("nestly_demo_meal_prep")?.value;
+
+      if (raw) {
+        try {
+          const lists = JSON.parse(raw) as DemoMealPrepLists;
+          if (lists[viewer.household.id]) {
+            return lists[viewer.household.id];
+          }
+        } catch {
+          // Fall back to the stable demo recipes when the cookie is malformed.
+        }
+      }
+
+      return demoMealPrepRecipes.map((recipe) => ({
+        ...recipe,
+        ingredients: [...recipe.ingredients],
+      }));
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("meal_prep_recipes")
+      .select(
+        "id, name, description, ingredients, instructions, servings, prep_minutes, storage_method, shelf_life_days, last_prepared_at, created_by, created_at",
+      )
+      .eq("household_id", viewer.household.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error("De mealprep-gerechten konden niet worden geladen.");
+    }
+
+    return (
+      data?.map((recipe) => ({
+        id: recipe.id,
+        name: recipe.name,
+        description: recipe.description,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        servings: recipe.servings,
+        prepMinutes: recipe.prep_minutes,
+        storageMethod: recipe.storage_method,
+        shelfLifeDays: recipe.shelf_life_days,
+        lastPreparedAt: recipe.last_prepared_at,
+        createdBy: recipe.created_by,
+        createdAt: recipe.created_at,
       })) ?? []
     );
   },

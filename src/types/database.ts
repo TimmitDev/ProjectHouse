@@ -267,6 +267,51 @@ export interface Database {
         };
         Relationships: [];
       };
+      meal_prep_recipes: {
+        Row: {
+          id: string;
+          household_id: string;
+          name: string;
+          description: string;
+          ingredients: string[];
+          instructions: string;
+          servings: number;
+          prep_minutes: number;
+          storage_method: "fridge" | "freezer" | "room_temperature";
+          shelf_life_days: number;
+          last_prepared_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          name: string;
+          description?: string;
+          ingredients: string[];
+          instructions?: string;
+          servings?: number;
+          prep_minutes?: number;
+          storage_method?: "fridge" | "freezer" | "room_temperature";
+          shelf_life_days?: number;
+          last_prepared_at?: string | null;
+          created_by?: string | null;
+        };
+        Update: {
+          name?: string;
+          description?: string;
+          ingredients?: string[];
+          instructions?: string;
+          servings?: number;
+          prep_minutes?: number;
+          storage_method?: "fridge" | "freezer" | "room_temperature";
+          shelf_life_days?: number;
+          last_prepared_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

@@ -100,6 +100,26 @@ export interface GroceryItem {
   createdAt: string;
 }
 
+export type MealStorageMethod =
+  | "fridge"
+  | "freezer"
+  | "room_temperature";
+
+export interface MealPrepRecipe {
+  id: string;
+  name: string;
+  description: string;
+  ingredients: string[];
+  instructions: string;
+  servings: number;
+  prepMinutes: number;
+  storageMethod: MealStorageMethod;
+  shelfLifeDays: number;
+  lastPreparedAt: string | null;
+  createdBy: string | null;
+  createdAt: string;
+}
+
 export interface DashboardData {
   balance: number;
   monthlyIncome: number;

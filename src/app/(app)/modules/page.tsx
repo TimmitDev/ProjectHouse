@@ -12,6 +12,9 @@ export default async function ModulesPage() {
   const viewer = await getViewer();
   if (!viewer?.household) redirect("/onboarding");
   const canManage = viewer.household.role !== "member";
+  const sortedModules = [...moduleCatalog].sort(
+    (left, right) => Number(right.available) - Number(left.available),
+  );
 
   return (
     <div className="space-y-7">
@@ -29,7 +32,7 @@ export default async function ModulesPage() {
       )}
 
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {moduleCatalog.map((module) => (
+        {sortedModules.map((module) => (
           <ModuleCard
             key={module.key}
             module={module}

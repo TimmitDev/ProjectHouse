@@ -14,6 +14,7 @@ en Supabase.
 - Financiële agenda met toegewezen en terugkerende inkomsten en uitgaven
 - Gedeelde spaardoelen met atomaire bijdragen
 - Een gezamenlijke boodschappenlijst met categorieën en afvinkstatus
+- Mealprep-gerechten met ingrediënten, bereiding en houdbaarheid
 - Wisselen tussen meerdere huishoudens en extra huishoudens aanmaken
 - Instellingen voor account, regio, valuta en themakleur
 - PostgreSQL Row Level Security voor huishoudgegevens

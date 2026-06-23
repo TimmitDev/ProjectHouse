@@ -4,6 +4,7 @@ import {
   Boxes,
   CalendarDays,
   ChevronDown,
+  CookingPot,
   Goal,
   LayoutDashboard,
   Menu,
@@ -36,6 +37,9 @@ export function AppShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [financeOpen, setFinanceOpen] = useState(
     pathname.startsWith("/finances"),
+  );
+  const [groceriesOpen, setGroceriesOpen] = useState(
+    pathname.startsWith("/groceries"),
   );
   const financesEnabled = viewer.enabledModules.includes("finances");
   const groceriesEnabled = viewer.enabledModules.includes("groceries");
@@ -132,8 +136,41 @@ export function AppShell({
           </div>
         )}
 
-        {groceriesEnabled &&
-          navLink("/groceries", "Boodschappen", ShoppingBasket)}
+        {groceriesEnabled && (
+          <div>
+            <button
+              type="button"
+              onClick={() => setGroceriesOpen((value) => !value)}
+              className={cn(
+                "flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium transition",
+                pathname.startsWith("/groceries")
+                  ? "text-slate-900"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+              )}
+              aria-expanded={groceriesOpen}
+            >
+              <ShoppingBasket className="size-[18px]" />
+              <span className="flex-1 text-left">Boodschappen</span>
+              <ChevronDown
+                className={cn(
+                  "size-4 transition-transform",
+                  groceriesOpen && "rotate-180",
+                )}
+              />
+            </button>
+            {groceriesOpen && (
+              <div className="mt-1 space-y-1">
+                {navLink("/groceries", "Boodschappenlijst", ShoppingBasket, true)}
+                {navLink(
+                  "/groceries/meal-prep",
+                  "Mealprep",
+                  CookingPot,
+                  true,
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
       <div className="space-y-1 border-t border-slate-100 pt-4">
