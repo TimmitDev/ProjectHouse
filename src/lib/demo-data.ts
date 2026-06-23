@@ -6,6 +6,7 @@ import type {
   MealPrepRecipe,
   ModuleKey,
   SavingsGoal,
+  SavingsPot,
   Viewer,
 } from "@/types/app";
 
@@ -187,6 +188,47 @@ export const demoFinancialAgendaItems: FinancialAgendaItem[] = [
     assignedTo: "demo-member",
     assignedToName: "Jamie Morgan",
     createdBy: "demo-member",
+  },
+];
+
+export const demoSavingsPots: SavingsPot[] = [
+  {
+    id: "pot-buffer",
+    name: "Huishoudbuffer",
+    description: "Voor onverwachte reparaties en tegenvallers.",
+    targetAmount: 3000,
+    currentAmount: 1850,
+    color: "#52796F",
+    createdBy: "demo-user",
+    createdAt: "2026-05-01T10:00:00.000Z",
+    recentEntries: [
+      {
+        id: "pot-entry-buffer-1",
+        amount: 250,
+        note: "Maandelijkse inleg",
+        createdBy: "demo-user",
+        createdAt: "2026-06-20T09:00:00.000Z",
+      },
+    ],
+  },
+  {
+    id: "pot-weekend",
+    name: "Weekendjes weg",
+    description: "Een flexibel potje voor spontane uitstapjes.",
+    targetAmount: null,
+    currentAmount: 620,
+    color: "#4776A8",
+    createdBy: "demo-member",
+    createdAt: "2026-05-14T12:00:00.000Z",
+    recentEntries: [
+      {
+        id: "pot-entry-weekend-1",
+        amount: -80,
+        note: "Hotel aanbetaling",
+        createdBy: "demo-member",
+        createdAt: "2026-06-18T15:00:00.000Z",
+      },
+    ],
   },
 ];
 

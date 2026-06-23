@@ -134,6 +134,59 @@ export interface Database {
         };
         Relationships: [];
       };
+      savings_pots: {
+        Row: {
+          id: string;
+          household_id: string;
+          name: string;
+          description: string;
+          target_amount: number | null;
+          current_amount: number;
+          color: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          name: string;
+          description?: string;
+          target_amount?: number | null;
+          current_amount?: number;
+          color?: string;
+          created_by?: string | null;
+        };
+        Update: {
+          name?: string;
+          description?: string;
+          target_amount?: number | null;
+          color?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      savings_pot_entries: {
+        Row: {
+          id: string;
+          pot_id: string;
+          household_id: string;
+          amount: number;
+          note: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          pot_id: string;
+          household_id: string;
+          amount: number;
+          note?: string;
+          created_by?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
       transactions: {
         Row: {
           id: string;
@@ -357,6 +410,14 @@ export interface Database {
           range_end: string | null;
         };
         Returns: Json;
+      };
+      adjust_savings_pot: {
+        Args: {
+          target_pot_id: string;
+          adjustment_amount: number;
+          entry_note: string;
+        };
+        Returns: number;
       };
     };
     Enums: Record<string, never>;

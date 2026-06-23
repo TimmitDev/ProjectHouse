@@ -6,6 +6,7 @@ import {
   demoFinancialAgendaItems,
   demoGroceryItems,
   demoMealPrepRecipes,
+  demoSavingsPots,
   demoHouseholds,
   demoViewer,
 } from "@/lib/demo-data";
@@ -20,6 +21,7 @@ import type {
   HouseholdMember,
   ModuleKey,
   MealPrepRecipe,
+  SavingsPot,
   SavingsGoal,
   Transaction,
   Viewer,
@@ -588,6 +590,82 @@ export const getSavingsGoalsData = cache(
         deadline: goal.deadline,
         color: goal.color,
         icon: goal.icon,
+      })) ?? []
+    );
+  },
+);
+
+type DemoSavingsPots = Record<string, SavingsPot[]>;
+
+export const getSavingsPots = cache(
+  async (viewer: Viewer): Promise<SavingsPot[]> => {
+    if (!viewer.household) return [];
+
+    if (viewer.isDemo) {
+      const cookieStore = await cookies();
+      const raw = cookieStore.get("nestly_demo_savings_pots")?.value;
+
+      if (raw) {
+        try {
+          const potsByHousehold = JSON.parse(raw) as DemoSavingsPots;
+          if (potsByHousehold[viewer.household.id]) {
+            return potsByHousehold[viewer.household.id];
+          }
+        } catch {
+          // Fall back to stable demo pots when the cookie is malformed.
+        }
+      }
+
+      return demoSavingsPots.map((pot) => ({
+        ...pot,
+        recentEntries: pot.recentEntries.map((entry) => ({ ...entry })),
+      }));
+    }
+
+    const supabase = await createClient();
+    const [{ data: pots, error: potsError }, { data: entries, error: entriesError }] =
+      await Promise.all([
+        supabase
+          .from("savings_pots")
+          .select(
+            "id, name, description, target_amount, current_amount, color, created_by, created_at",
+          )
+          .eq("household_id", viewer.household.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("savings_pot_entries")
+          .select("id, pot_id, amount, note, created_by, created_at")
+          .eq("household_id", viewer.household.id)
+          .order("created_at", { ascending: false })
+          .limit(100),
+      ]);
+
+    if (potsError || entriesError) {
+      throw new Error("De spaarpotjes konden niet worden geladen.");
+    }
+
+    return (
+      pots?.map((pot) => ({
+        id: pot.id,
+        name: pot.name,
+        description: pot.description,
+        targetAmount:
+          pot.target_amount === null ? null : numeric(pot.target_amount),
+        currentAmount: numeric(pot.current_amount),
+        color: pot.color,
+        createdBy: pot.created_by,
+        createdAt: pot.created_at,
+        recentEntries:
+          entries
+            ?.filter((entry) => entry.pot_id === pot.id)
+            .slice(0, 3)
+            .map((entry) => ({
+              id: entry.id,
+              amount: numeric(entry.amount),
+              note: entry.note,
+              createdBy: entry.created_by,
+              createdAt: entry.created_at,
+            })) ?? [],
       })) ?? []
     );
   },

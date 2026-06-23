@@ -8,6 +8,7 @@ import {
   Goal,
   LayoutDashboard,
   Menu,
+  PiggyBank,
   ShoppingBasket,
   WalletCards,
   X,
@@ -131,6 +132,12 @@ export function AppShell({
                   true,
                 )}
                 {navLink("/finances/goals", "Spaardoelen", Goal, true)}
+                {navLink(
+                  "/finances/pots",
+                  "Spaarpotjes",
+                  PiggyBank,
+                  true,
+                )}
               </div>
             )}
           </div>

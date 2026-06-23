@@ -44,6 +44,26 @@ export interface SavingsGoal {
   icon: string;
 }
 
+export interface SavingsPotEntry {
+  id: string;
+  amount: number;
+  note: string;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+export interface SavingsPot {
+  id: string;
+  name: string;
+  description: string;
+  targetAmount: number | null;
+  currentAmount: number;
+  color: string;
+  createdBy: string | null;
+  createdAt: string;
+  recentEntries: SavingsPotEntry[];
+}
+
 export interface Transaction {
   id: string;
   description: string;
