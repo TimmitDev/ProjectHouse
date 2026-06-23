@@ -9,7 +9,7 @@ import {
 } from "@/components/dashboard/widgets";
 import { AddTransactionButton } from "@/components/finances/transaction-form";
 import { Card, PageHeader } from "@/components/ui/card";
-import { getDashboardData, getViewer } from "@/lib/data";
+import { getFinanceOverviewData, getViewer } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Financiën" };
@@ -18,7 +18,7 @@ export default async function FinancesPage() {
   const viewer = await getViewer();
   if (!viewer?.household) redirect("/onboarding");
   if (!viewer.enabledModules.includes("finances")) redirect("/modules");
-  const data = await getDashboardData(viewer);
+  const data = await getFinanceOverviewData(viewer);
   const { currency, locale } = viewer.profile;
 
   return (

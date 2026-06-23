@@ -55,6 +55,38 @@ function occurrenceAt(item: FinancialAgendaItem, index: number) {
   return start;
 }
 
+function firstRelevantIndex(
+  item: FinancialAgendaItem,
+  rangeStart: Date,
+) {
+  const itemStart = parseDateOnly(item.dueDate);
+
+  if (itemStart >= rangeStart || item.recurrence === "none") {
+    return 0;
+  }
+
+  if (item.recurrence === "weekly") {
+    return Math.max(
+      0,
+      Math.floor((rangeStart.getTime() - itemStart.getTime()) / (7 * DAY_IN_MS)) -
+        1,
+    );
+  }
+
+  if (item.recurrence === "monthly") {
+    const monthDifference =
+      (rangeStart.getUTCFullYear() - itemStart.getUTCFullYear()) * 12 +
+      rangeStart.getUTCMonth() -
+      itemStart.getUTCMonth();
+    return Math.max(0, monthDifference - 1);
+  }
+
+  return Math.max(
+    0,
+    rangeStart.getUTCFullYear() - itemStart.getUTCFullYear() - 1,
+  );
+}
+
 export function expandFinancialAgendaItems(
   items: FinancialAgendaItem[],
   rangeStart: string,
@@ -73,7 +105,9 @@ export function expandFinancialAgendaItems(
       continue;
     }
 
-    for (let index = 0; index < 5000; index += 1) {
+    const firstIndex = firstRelevantIndex(item, start);
+    for (let offset = 0; offset < 5000; offset += 1) {
+      const index = firstIndex + offset;
       const date = occurrenceAt(item, index);
       if (date > end) break;
       if (date >= start) {

@@ -227,6 +227,26 @@ export interface Database {
         Args: { goal_id: string; contribution_amount: number };
         Returns: number;
       };
+      get_viewer_context: {
+        Args: { requested_household_id: string | null };
+        Returns: Json;
+      };
+      get_household_dashboard: {
+        Args: {
+          target_household_id: string;
+          include_goals: boolean;
+          include_members: boolean;
+        };
+        Returns: Json;
+      };
+      get_financial_agenda_context: {
+        Args: {
+          target_household_id: string;
+          range_start: string | null;
+          range_end: string | null;
+        };
+        Returns: Json;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

@@ -36,13 +36,22 @@ const recurrenceLabels: Record<FinancialRecurrence, string> = {
   yearly: "Jaarlijks",
 };
 
+const agendaDateFormatters = new Map<string, Intl.DateTimeFormat>();
+
 function formatAgendaDate(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  }).format(new Date(`${value}T00:00:00Z`));
+  let formatter = agendaDateFormatters.get(locale);
+
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    });
+    agendaDateFormatters.set(locale, formatter);
+  }
+
+  return formatter.format(new Date(`${value}T00:00:00Z`));
 }
 
 function AgendaListItem({
@@ -124,12 +133,22 @@ export default async function FinancialAgendaPage({
     params.month || new Date().toISOString().slice(0, 7);
   const month = getMonthRange(requestedMonth);
   const calendarRange = getCalendarRange(month.key);
-  const data = await getFinancialAgendaData(viewer);
+  const data = await getFinancialAgendaData(viewer, calendarRange);
   const calendarOccurrences = expandFinancialAgendaItems(
     data.items,
     calendarRange.start,
     calendarRange.end,
   );
+  const occurrencesByDate = new Map<
+    string,
+    FinancialAgendaOccurrence[]
+  >();
+  for (const occurrence of calendarOccurrences) {
+    const dayOccurrences =
+      occurrencesByDate.get(occurrence.occurrenceDate) ?? [];
+    dayOccurrences.push(occurrence);
+    occurrencesByDate.set(occurrence.occurrenceDate, dayOccurrences);
+  }
   const monthOccurrences = calendarOccurrences.filter(
     (occurrence) =>
       occurrence.occurrenceDate >= month.start &&
@@ -153,6 +172,8 @@ export default async function FinancialAgendaPage({
     year: "numeric",
     timeZone: "UTC",
   }).format(month.date);
+
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="space-y-7">
@@ -262,12 +283,9 @@ export default async function FinancialAgendaPage({
           </div>
           <div className="grid grid-cols-7">
             {calendarDates.map((date, index) => {
-              const dayOccurrences = calendarOccurrences.filter(
-                (occurrence) => occurrence.occurrenceDate === date,
-              );
+              const dayOccurrences = occurrencesByDate.get(date) ?? [];
               const inMonth = date.startsWith(month.key);
-              const isToday =
-                date === new Date().toISOString().slice(0, 10);
+              const isToday = date === today;
 
               return (
                 <div

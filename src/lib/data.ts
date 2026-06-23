@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import {
   demoDashboardData,
@@ -13,13 +14,95 @@ import type {
   FinancialAgendaData,
   FinancialAgendaItem,
   Household,
+  HouseholdMember,
   ModuleKey,
   SavingsGoal,
+  Transaction,
   Viewer,
 } from "@/types/app";
 
+type ViewerContextRpc = {
+  profile?: {
+    full_name?: string;
+    locale?: string;
+    currency?: string;
+    accent_color?: string;
+  };
+  households?: Array<{
+    id: string;
+    name: string;
+    invite_code: string;
+    currency: string;
+    role: Household["role"];
+  }>;
+  active_household_id?: string | null;
+  enabled_modules?: ModuleKey[];
+};
+
+type DashboardRpc = {
+  total_income?: number | string;
+  total_expenses?: number | string;
+  monthly_income?: number | string;
+  monthly_expenses?: number | string;
+  goals?: Array<{
+    id: string;
+    name: string;
+    target_amount: number | string;
+    current_amount: number | string;
+    deadline: string | null;
+    color: string;
+    icon: string;
+  }>;
+  transactions?: Array<{
+    id: string;
+    description: string;
+    category: string;
+    amount: number | string;
+    transaction_date: string;
+    type: Transaction["type"];
+  }>;
+  members?: Array<{
+    id: string;
+    name: string;
+    role: HouseholdMember["role"];
+  }>;
+};
+
+type FinancialAgendaRpc = {
+  items?: Array<{
+    id: string;
+    title: string;
+    category: string;
+    amount: number | string;
+    type: FinancialAgendaItem["type"];
+    due_date: string;
+    recurrence: FinancialAgendaItem["recurrence"];
+    assigned_to: string;
+    assigned_to_name: string;
+    created_by: string;
+  }>;
+  members?: Array<{
+    id: string;
+    name: string;
+    role: HouseholdMember["role"];
+  }>;
+};
+
 function numeric(value: number | string | null | undefined) {
   return Number(value ?? 0);
+}
+
+function isUuid(value: string | undefined) {
+  return Boolean(
+    value &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        value,
+      ),
+  );
+}
+
+function isMissingRpcError(error: { code?: string } | null) {
+  return error?.code === "PGRST202" || error?.code === "42883";
 }
 
 async function getDemoViewer(): Promise<Viewer | null> {
@@ -39,9 +122,7 @@ async function getDemoViewer(): Promise<Viewer | null> {
   const households = hasHousehold
     ? [...demoHouseholds, ...customHouseholds]
     : [];
-  const activeHouseholdId = cookieStore.get(
-    "nestly_active_household",
-  )?.value;
+  const activeHouseholdId = cookieStore.get("nestly_active_household")?.value;
   const activeHousehold =
     households.find((item) => item.id === activeHouseholdId) ??
     households[0] ??
@@ -73,7 +154,7 @@ async function getDemoViewer(): Promise<Viewer | null> {
   };
 }
 
-export async function getViewer(): Promise<Viewer | null> {
+async function getViewerImpl(): Promise<Viewer | null> {
   if (isDemoMode) {
     return getDemoViewer();
   }
@@ -83,89 +164,135 @@ export async function getViewer(): Promise<Viewer | null> {
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+  const claims = authData?.claims;
 
-  if (!user) {
+  if (authError || !claims?.sub) {
     return null;
   }
 
-  const [{ data: profile }, { data: memberships }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    supabase
-      .from("household_members")
-      .select("household_id, role")
-      .eq("user_id", user.id),
-  ]);
+  const cookieStore = await cookies();
+  const activeHouseholdCookie = cookieStore.get(
+    "nestly_active_household",
+  )?.value;
+  const requestedHouseholdId = isUuid(activeHouseholdCookie)
+    ? activeHouseholdCookie!
+    : null;
+  const { data, error } = await supabase.rpc("get_viewer_context", {
+    requested_household_id: requestedHouseholdId,
+  });
 
-  let household: Viewer["household"] = null;
-  let households: Viewer["households"] = [];
-  let enabledModules: ModuleKey[] = [];
+  let context = data as ViewerContextRpc | null;
 
-  if (memberships?.length) {
-    const householdIds = memberships.map((item) => item.household_id);
-    const { data: householdRows } = await supabase
-      .from("households")
-      .select("id, name, invite_code, currency")
-      .in("id", householdIds);
+  if (error && !isMissingRpcError(error)) {
+    throw new Error("De gebruikersgegevens konden niet worden geladen.");
+  }
 
-    households =
-      memberships.flatMap((membership) => {
-        const row = householdRows?.find(
-          (item) => item.id === membership.household_id,
+  if (error) {
+    const [{ data: profile }, { data: memberships }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("full_name, locale, currency, accent_color")
+        .eq("id", claims.sub)
+        .maybeSingle(),
+      supabase
+        .from("household_members")
+        .select("household_id, role")
+        .eq("user_id", claims.sub),
+    ]);
+
+    let householdRows: Array<{
+      id: string;
+      name: string;
+      invite_code: string;
+      currency: string;
+    }> = [];
+
+    if (memberships?.length) {
+      const result = await supabase
+        .from("households")
+        .select("id, name, invite_code, currency")
+        .in(
+          "id",
+          memberships.map((membership) => membership.household_id),
+        );
+      householdRows = result.data ?? [];
+    }
+
+    const households =
+      memberships?.flatMap((membership) => {
+        const row = householdRows.find(
+          (householdRow) => householdRow.id === membership.household_id,
         );
         return row
           ? [
               {
-                id: row.id,
-                name: row.name,
-                inviteCode: row.invite_code,
-                currency: row.currency,
+                ...row,
                 role: membership.role,
               },
             ]
           : [];
       }) ?? [];
-
-    const cookieStore = await cookies();
-    const activeHouseholdId = cookieStore.get(
-      "nestly_active_household",
-    )?.value;
-    household =
-      households.find((item) => item.id === activeHouseholdId) ??
-      households[0] ??
+    const activeHouseholdId =
+      households.find((item) => item.id === activeHouseholdCookie)?.id ??
+      households[0]?.id ??
       null;
+    const { data: moduleRows } = activeHouseholdId
+      ? await supabase
+          .from("household_modules")
+          .select("module_key")
+          .eq("household_id", activeHouseholdId)
+          .eq("enabled", true)
+      : { data: [] };
 
-    if (household) {
-      const { data: moduleRows } = await supabase
-        .from("household_modules")
-        .select("module_key, enabled")
-        .eq("household_id", household.id)
-        .eq("enabled", true);
-
-      enabledModules =
-        moduleRows?.map((row) => row.module_key as ModuleKey) ?? [];
-    }
+    context = {
+      profile: profile ?? undefined,
+      households,
+      active_household_id: activeHouseholdId,
+      enabled_modules:
+        moduleRows?.map((row) => row.module_key as ModuleKey) ?? [],
+    };
   }
+
+  const email = typeof claims.email === "string" ? claims.email : "";
+  const metadataName =
+    typeof claims.user_metadata?.full_name === "string"
+      ? claims.user_metadata.full_name
+      : "";
+  const households: Household[] =
+    context?.households?.map((household) => ({
+      id: household.id,
+      name: household.name,
+      inviteCode: household.invite_code,
+      currency: household.currency,
+      role: household.role,
+    })) ?? [];
+  const household =
+    households.find(
+      (item) => item.id === context?.active_household_id,
+    ) ?? null;
 
   return {
     profile: {
-      id: user.id,
+      id: claims.sub,
       fullName:
-        profile?.full_name ||
-        String(user.user_metadata.full_name ?? user.email?.split("@")[0] ?? ""),
-      email: user.email ?? "",
-      locale: profile?.locale ?? "nl-NL",
-      currency: profile?.currency ?? "EUR",
-      accentColor: profile?.accent_color ?? "#52796F",
+        context?.profile?.full_name ||
+        metadataName ||
+        email.split("@")[0] ||
+        "",
+      email,
+      locale: context?.profile?.locale ?? "nl-NL",
+      currency: context?.profile?.currency ?? "EUR",
+      accentColor: context?.profile?.accent_color ?? "#52796F",
     },
     household,
     households,
-    enabledModules,
+    enabledModules: context?.enabled_modules ?? [],
     isDemo: false,
   };
 }
+
+export const getViewer = cache(getViewerImpl);
 
 async function getDemoDashboardData(): Promise<DashboardData> {
   const cookieStore = await cookies();
@@ -186,25 +313,74 @@ async function getDemoDashboardData(): Promise<DashboardData> {
   };
 }
 
-export async function getDashboardData(
-  viewer: Viewer,
-): Promise<DashboardData> {
-  if (viewer.isDemo) {
-    return getDemoDashboardData();
-  }
+function emptyDashboardData(): DashboardData {
+  return {
+    balance: 0,
+    monthlyIncome: 0,
+    monthlyExpenses: 0,
+    monthlySavings: 0,
+    savingsRate: 0,
+    goals: [],
+    transactions: [],
+    members: [],
+  };
+}
 
-  if (!viewer.household) {
-    return {
-      balance: 0,
-      monthlyIncome: 0,
-      monthlyExpenses: 0,
-      monthlySavings: 0,
-      savingsRate: 0,
-      goals: [],
-      transactions: [],
-      members: [],
-    };
-  }
+function mapDashboardData(
+  data: DashboardRpc | null,
+  viewer: Viewer,
+): DashboardData {
+  const totalIncome = numeric(data?.total_income);
+  const totalExpenses = numeric(data?.total_expenses);
+  const monthlyIncome = numeric(data?.monthly_income);
+  const monthlyExpenses = numeric(data?.monthly_expenses);
+
+  return {
+    balance: totalIncome - totalExpenses,
+    monthlyIncome,
+    monthlyExpenses,
+    monthlySavings: Math.max(0, monthlyIncome - monthlyExpenses),
+    savingsRate:
+      monthlyIncome > 0
+        ? Math.round(
+            ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100,
+          )
+        : 0,
+    goals:
+      data?.goals?.map((goal) => ({
+        id: goal.id,
+        name: goal.name,
+        targetAmount: numeric(goal.target_amount),
+        currentAmount: numeric(goal.current_amount),
+        deadline: goal.deadline,
+        color: goal.color,
+        icon: goal.icon,
+      })) ?? [],
+    transactions:
+      data?.transactions?.map((transaction) => ({
+        id: transaction.id,
+        description: transaction.description,
+        category: transaction.category,
+        amount: numeric(transaction.amount),
+        transactionDate: transaction.transaction_date,
+        type: transaction.type,
+      })) ?? [],
+    members:
+      data?.members?.map((member) => ({
+        id: member.id,
+        name: member.name,
+        email: member.id === viewer.profile.id ? viewer.profile.email : "",
+        role: member.role,
+      })) ?? [],
+  };
+}
+
+async function getLegacyDashboardData(
+  viewer: Viewer,
+  includeGoals: boolean,
+  includeMembers: boolean,
+): Promise<DashboardData> {
+  if (!viewer.household) return emptyDashboardData();
 
   const supabase = await createClient();
   const householdId = viewer.household.id;
@@ -215,20 +391,33 @@ export async function getDashboardData(
     .toISOString()
     .slice(0, 10);
 
+  const goalsQuery = includeGoals
+    ? supabase
+        .from("savings_goals")
+        .select(
+          "id, name, target_amount, current_amount, deadline, color, icon",
+        )
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: false })
+    : Promise.resolve({ data: [] });
+  const membershipsQuery = includeMembers
+    ? supabase
+        .from("household_members")
+        .select("user_id, role")
+        .eq("household_id", householdId)
+    : Promise.resolve({ data: [] });
   const [
     { data: goals },
     { data: recentTransactions },
     { data: allTransactions },
     { data: memberships },
   ] = await Promise.all([
-    supabase
-      .from("savings_goals")
-      .select("*")
-      .eq("household_id", householdId)
-      .order("created_at", { ascending: false }),
+    goalsQuery,
     supabase
       .from("transactions")
-      .select("*")
+      .select(
+        "id, description, category, amount, transaction_date, type",
+      )
       .eq("household_id", householdId)
       .order("transaction_date", { ascending: false })
       .limit(8),
@@ -236,17 +425,16 @@ export async function getDashboardData(
       .from("transactions")
       .select("amount, type, transaction_date")
       .eq("household_id", householdId),
-    supabase
-      .from("household_members")
-      .select("user_id, role")
-      .eq("household_id", householdId),
+    membershipsQuery,
   ]);
 
   const memberIds = memberships?.map((member) => member.user_id) ?? [];
   const { data: profiles } = memberIds.length
-    ? await supabase.from("profiles").select("id, full_name").in("id", memberIds)
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", memberIds)
     : { data: [] };
-
   const monthly = allTransactions?.filter(
     (transaction) => transaction.transaction_date >= monthStart,
   );
@@ -309,78 +497,243 @@ export async function getDashboardData(
         return {
           id: member.user_id,
           name: profile?.full_name || "Huishoudlid",
-          email: member.user_id === viewer.profile.id ? viewer.profile.email : "",
+          email:
+            member.user_id === viewer.profile.id ? viewer.profile.email : "",
           role: member.role,
         };
       }) ?? [],
   };
 }
 
-export async function getFinancialAgendaData(
-  viewer: Viewer,
-): Promise<FinancialAgendaData> {
-  if (viewer.isDemo) {
-    const cookieStore = await cookies();
-    const customItems = JSON.parse(
-      cookieStore.get("nestly_demo_financial_agenda")?.value || "[]",
-    ) as FinancialAgendaItem[];
+const getHouseholdDashboardData = cache(
+  async (
+    viewer: Viewer,
+    includeGoals: boolean,
+    includeMembers: boolean,
+  ): Promise<DashboardData> => {
+    if (viewer.isDemo) {
+      const data = await getDemoDashboardData();
+      return {
+        ...data,
+        goals: includeGoals ? data.goals : [],
+        members: includeMembers ? data.members : [],
+      };
+    }
+
+    if (!viewer.household) {
+      return emptyDashboardData();
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_household_dashboard", {
+      target_household_id: viewer.household.id,
+      include_goals: includeGoals,
+      include_members: includeMembers,
+    });
+
+    if (error && isMissingRpcError(error)) {
+      return getLegacyDashboardData(viewer, includeGoals, includeMembers);
+    }
+
+    if (error) {
+      throw new Error("De financiële gegevens konden niet worden geladen.");
+    }
+
+    return mapDashboardData(data as DashboardRpc | null, viewer);
+  },
+);
+
+export function getDashboardData(viewer: Viewer) {
+  return getHouseholdDashboardData(viewer, true, true);
+}
+
+export function getFinanceOverviewData(viewer: Viewer) {
+  return getHouseholdDashboardData(viewer, false, false);
+}
+
+export const getSavingsGoalsData = cache(
+  async (viewer: Viewer): Promise<SavingsGoal[]> => {
+    if (viewer.isDemo) {
+      return (await getDemoDashboardData()).goals;
+    }
+
+    if (!viewer.household) {
+      return [];
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("savings_goals")
+      .select(
+        "id, name, target_amount, current_amount, deadline, color, icon",
+      )
+      .eq("household_id", viewer.household.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error("De spaardoelen konden niet worden geladen.");
+    }
+
+    return (
+      data?.map((goal) => ({
+        id: goal.id,
+        name: goal.name,
+        targetAmount: numeric(goal.target_amount),
+        currentAmount: numeric(goal.current_amount),
+        deadline: goal.deadline,
+        color: goal.color,
+        icon: goal.icon,
+      })) ?? []
+    );
+  },
+);
+
+function filterDemoAgendaItems(
+  items: FinancialAgendaItem[],
+  rangeStart: string | null,
+  rangeEnd: string | null,
+) {
+  if (!rangeStart && !rangeEnd) return items;
+
+  return items.filter(
+    (item) =>
+      (!rangeEnd || item.dueDate <= rangeEnd) &&
+      (item.recurrence !== "none" ||
+        !rangeStart ||
+        item.dueDate >= rangeStart),
+  );
+}
+
+const getFinancialAgendaDataCached = cache(
+  async (
+    viewer: Viewer,
+    rangeStart: string | null,
+    rangeEnd: string | null,
+  ): Promise<FinancialAgendaData> => {
+    if (viewer.isDemo) {
+      const cookieStore = await cookies();
+      const customItems = JSON.parse(
+        cookieStore.get("nestly_demo_financial_agenda")?.value || "[]",
+      ) as FinancialAgendaItem[];
+
+      return {
+        items: filterDemoAgendaItems(
+          [...demoFinancialAgendaItems, ...customItems],
+          rangeStart,
+          rangeEnd,
+        ),
+        members: demoDashboardData.members,
+      };
+    }
+
+    if (!viewer.household) {
+      return { items: [], members: [] };
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc(
+      "get_financial_agenda_context",
+      {
+        target_household_id: viewer.household.id,
+        range_start: rangeStart,
+        range_end: rangeEnd,
+      },
+    );
+
+    if (error && !isMissingRpcError(error)) {
+      throw new Error("De financiële agenda kon niet worden geladen.");
+    }
+
+    if (!error) {
+      const context = data as FinancialAgendaRpc | null;
+      return {
+        items:
+          context?.items?.map((item) => ({
+            id: item.id,
+            title: item.title,
+            category: item.category,
+            amount: numeric(item.amount),
+            type: item.type,
+            dueDate: item.due_date,
+            recurrence: item.recurrence,
+            assignedTo: item.assigned_to,
+            assignedToName: item.assigned_to_name,
+            createdBy: item.created_by,
+          })) ?? [],
+        members:
+          context?.members?.map((member) => ({
+            id: member.id,
+            name: member.name,
+            email:
+              member.id === viewer.profile.id ? viewer.profile.email : "",
+            role: member.role,
+          })) ?? [],
+      };
+    }
+
+    const [{ data: agendaItems }, { data: memberships }] = await Promise.all([
+      supabase
+        .from("financial_agenda_items")
+        .select(
+          "id, title, category, amount, type, due_date, recurrence, assigned_to, created_by",
+        )
+        .eq("household_id", viewer.household.id)
+        .order("due_date", { ascending: true }),
+      supabase
+        .from("household_members")
+        .select("user_id, role")
+        .eq("household_id", viewer.household.id),
+    ]);
+    const memberIds = memberships?.map((member) => member.user_id) ?? [];
+    const { data: profiles } = memberIds.length
+      ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", memberIds)
+      : { data: [] };
+    const members =
+      memberships?.map((member) => {
+        const profile = profiles?.find((row) => row.id === member.user_id);
+        return {
+          id: member.user_id,
+          name: profile?.full_name || "Huishoudlid",
+          email:
+            member.user_id === viewer.profile.id ? viewer.profile.email : "",
+          role: member.role,
+        };
+      }) ?? [];
 
     return {
-      items: [...demoFinancialAgendaItems, ...customItems],
-      members: demoDashboardData.members,
+      items: filterDemoAgendaItems(
+        agendaItems?.map((item) => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          amount: numeric(item.amount),
+          type: item.type,
+          dueDate: item.due_date,
+          recurrence: item.recurrence,
+          assignedTo: item.assigned_to,
+          assignedToName:
+            members.find((member) => member.id === item.assigned_to)?.name ||
+            "Huishoudlid",
+          createdBy: item.created_by,
+        })) ?? [],
+        rangeStart,
+        rangeEnd,
+      ),
+      members,
     };
-  }
+  },
+);
 
-  if (!viewer.household) {
-    return { items: [], members: [] };
-  }
-
-  const supabase = await createClient();
-  const householdId = viewer.household.id;
-  const [{ data: agendaItems }, { data: memberships }] = await Promise.all([
-    supabase
-      .from("financial_agenda_items")
-      .select("*")
-      .eq("household_id", householdId)
-      .order("due_date", { ascending: true }),
-    supabase
-      .from("household_members")
-      .select("user_id, role")
-      .eq("household_id", householdId),
-  ]);
-
-  const memberIds = memberships?.map((member) => member.user_id) ?? [];
-  const { data: profiles } = memberIds.length
-    ? await supabase.from("profiles").select("id, full_name").in("id", memberIds)
-    : { data: [] };
-
-  const members =
-    memberships?.map((member) => {
-      const profile = profiles?.find((row) => row.id === member.user_id);
-      return {
-        id: member.user_id,
-        name: profile?.full_name || "Huishoudlid",
-        email: member.user_id === viewer.profile.id ? viewer.profile.email : "",
-        role: member.role,
-      };
-    }) ?? [];
-
-  return {
-    items:
-      agendaItems?.map((item) => ({
-        id: item.id,
-        title: item.title,
-        category: item.category,
-        amount: numeric(item.amount),
-        type: item.type,
-        dueDate: item.due_date,
-        recurrence: item.recurrence,
-        assignedTo: item.assigned_to,
-        assignedToName:
-          members.find((member) => member.id === item.assigned_to)?.name ||
-          "Huishoudlid",
-        createdBy: item.created_by,
-      })) ?? [],
-    members,
-  };
+export function getFinancialAgendaData(
+  viewer: Viewer,
+  range?: { start: string; end: string },
+) {
+  return getFinancialAgendaDataCached(
+    viewer,
+    range?.start ?? null,
+    range?.end ?? null,
+  );
 }

@@ -8,7 +8,7 @@ import {
   CreateGoalButton,
 } from "@/components/finances/goal-actions";
 import { Card, PageHeader } from "@/components/ui/card";
-import { getDashboardData, getViewer } from "@/lib/data";
+import { getSavingsGoalsData, getViewer } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Spaardoelen" };
@@ -17,13 +17,13 @@ export default async function SavingsGoalsPage() {
   const viewer = await getViewer();
   if (!viewer?.household) redirect("/onboarding");
   if (!viewer.enabledModules.includes("finances")) redirect("/modules");
-  const data = await getDashboardData(viewer);
+  const goals = await getSavingsGoalsData(viewer);
   const { currency, locale } = viewer.profile;
-  const totalSaved = data.goals.reduce(
+  const totalSaved = goals.reduce(
     (total, goal) => total + goal.currentAmount,
     0,
   );
-  const totalTarget = data.goals.reduce(
+  const totalTarget = goals.reduce(
     (total, goal) => total + goal.targetAmount,
     0,
   );
@@ -54,15 +54,15 @@ export default async function SavingsGoalsPage() {
           <div className="p-5 sm:p-6">
             <p className="text-xs font-medium text-slate-400">Actieve doelen</p>
             <p className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-slate-950">
-              {data.goals.length}
+              {goals.length}
             </p>
           </div>
         </div>
       </Card>
 
-      {data.goals.length ? (
+      {goals.length ? (
         <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {data.goals.map((goal) => {
+          {goals.map((goal) => {
             const complete = goal.currentAmount >= goal.targetAmount;
             return (
               <Card key={goal.id} className="flex min-h-72 flex-col p-5">
