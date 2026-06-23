@@ -204,6 +204,69 @@ export interface Database {
         };
         Relationships: [];
       };
+      grocery_items: {
+        Row: {
+          id: string;
+          household_id: string;
+          name: string;
+          quantity: string;
+          category:
+            | "produce"
+            | "bakery"
+            | "dairy"
+            | "meat"
+            | "pantry"
+            | "frozen"
+            | "drinks"
+            | "household"
+            | "other";
+          completed: boolean;
+          added_by: string | null;
+          completed_by: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          name: string;
+          quantity?: string;
+          category?:
+            | "produce"
+            | "bakery"
+            | "dairy"
+            | "meat"
+            | "pantry"
+            | "frozen"
+            | "drinks"
+            | "household"
+            | "other";
+          completed?: boolean;
+          added_by?: string | null;
+          completed_by?: string | null;
+          completed_at?: string | null;
+        };
+        Update: {
+          name?: string;
+          quantity?: string;
+          category?:
+            | "produce"
+            | "bakery"
+            | "dairy"
+            | "meat"
+            | "pantry"
+            | "frozen"
+            | "drinks"
+            | "household"
+            | "other";
+          completed?: boolean;
+          completed_by?: string | null;
+          completed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

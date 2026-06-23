@@ -77,6 +77,29 @@ export interface FinancialAgendaData {
   members: HouseholdMember[];
 }
 
+export type GroceryCategory =
+  | "produce"
+  | "bakery"
+  | "dairy"
+  | "meat"
+  | "pantry"
+  | "frozen"
+  | "drinks"
+  | "household"
+  | "other";
+
+export interface GroceryItem {
+  id: string;
+  name: string;
+  quantity: string;
+  category: GroceryCategory;
+  completed: boolean;
+  addedBy: string | null;
+  completedBy: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
 export interface DashboardData {
   balance: number;
   monthlyIncome: number;

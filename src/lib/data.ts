@@ -4,6 +4,7 @@ import { cache } from "react";
 import {
   demoDashboardData,
   demoFinancialAgendaItems,
+  demoGroceryItems,
   demoHouseholds,
   demoViewer,
 } from "@/lib/demo-data";
@@ -13,6 +14,7 @@ import type {
   DashboardData,
   FinancialAgendaData,
   FinancialAgendaItem,
+  GroceryItem,
   Household,
   HouseholdMember,
   ModuleKey,
@@ -737,3 +739,57 @@ export function getFinancialAgendaData(
     range?.end ?? null,
   );
 }
+
+type DemoGroceryLists = Record<string, GroceryItem[]>;
+
+export const getGroceryItems = cache(
+  async (viewer: Viewer): Promise<GroceryItem[]> => {
+    if (!viewer.household) return [];
+
+    if (viewer.isDemo) {
+      const cookieStore = await cookies();
+      const raw = cookieStore.get("nestly_demo_groceries")?.value;
+
+      if (raw) {
+        try {
+          const lists = JSON.parse(raw) as DemoGroceryLists;
+          if (lists[viewer.household.id]) {
+            return lists[viewer.household.id];
+          }
+        } catch {
+          // Fall back to the stable demo list when the cookie is malformed.
+        }
+      }
+
+      return demoGroceryItems.map((item) => ({ ...item }));
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("grocery_items")
+      .select(
+        "id, name, quantity, category, completed, added_by, completed_by, completed_at, created_at",
+      )
+      .eq("household_id", viewer.household.id)
+      .order("completed", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error("De boodschappenlijst kon niet worden geladen.");
+    }
+
+    return (
+      data?.map((item) => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        category: item.category,
+        completed: item.completed,
+        addedBy: item.added_by,
+        completedBy: item.completed_by,
+        completedAt: item.completed_at,
+        createdAt: item.created_at,
+      })) ?? []
+    );
+  },
+);

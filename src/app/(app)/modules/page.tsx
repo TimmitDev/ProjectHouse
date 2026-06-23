@@ -44,7 +44,7 @@ export default async function ModulesPage() {
           Er komen meer handige modules aan.
         </p>
         <p className="mt-1 text-xs text-slate-400">
-          De structuur is klaar voor agenda’s, huishoudelijke taken en boodschappen.
+          De structuur is klaar voor agenda’s, huishoudelijke taken en meer.
         </p>
       </div>
     </div>

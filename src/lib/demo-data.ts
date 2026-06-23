@@ -1,6 +1,7 @@
 import type {
   DashboardData,
   FinancialAgendaItem,
+  GroceryItem,
   Household,
   ModuleKey,
   SavingsGoal,
@@ -184,6 +185,53 @@ export const demoFinancialAgendaItems: FinancialAgendaItem[] = [
   },
 ];
 
+export const demoGroceryItems: GroceryItem[] = [
+  {
+    id: "grocery-tomatoes",
+    name: "Cherrytomaten",
+    quantity: "2 bakjes",
+    category: "produce",
+    completed: false,
+    addedBy: "demo-user",
+    completedBy: null,
+    completedAt: null,
+    createdAt: "2026-06-23T07:30:00.000Z",
+  },
+  {
+    id: "grocery-bread",
+    name: "Volkorenbrood",
+    quantity: "1",
+    category: "bakery",
+    completed: false,
+    addedBy: "demo-member",
+    completedBy: null,
+    completedAt: null,
+    createdAt: "2026-06-23T07:20:00.000Z",
+  },
+  {
+    id: "grocery-milk",
+    name: "Halfvolle melk",
+    quantity: "2 pakken",
+    category: "dairy",
+    completed: false,
+    addedBy: "demo-user",
+    completedBy: null,
+    completedAt: null,
+    createdAt: "2026-06-23T07:10:00.000Z",
+  },
+  {
+    id: "grocery-coffee",
+    name: "Koffiebonen",
+    quantity: "1 zak",
+    category: "pantry",
+    completed: true,
+    addedBy: "demo-member",
+    completedBy: "demo-user",
+    completedAt: "2026-06-23T08:00:00.000Z",
+    createdAt: "2026-06-22T18:00:00.000Z",
+  },
+];
+
 export const moduleCatalog: Array<{
   key: ModuleKey;
   name: string;
@@ -217,6 +265,6 @@ export const moduleCatalog: Array<{
     name: "Boodschappen",
     description: "Maak samen één actuele boodschappenlijst.",
     icon: "shopping",
-    available: false,
+    available: true,
   },
 ];

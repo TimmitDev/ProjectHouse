@@ -7,6 +7,7 @@ import {
   Goal,
   LayoutDashboard,
   Menu,
+  ShoppingBasket,
   WalletCards,
   X,
 } from "lucide-react";
@@ -37,6 +38,7 @@ export function AppShell({
     pathname.startsWith("/finances"),
   );
   const financesEnabled = viewer.enabledModules.includes("finances");
+  const groceriesEnabled = viewer.enabledModules.includes("groceries");
 
   const navLink = (
     href: string,
@@ -129,6 +131,9 @@ export function AppShell({
             )}
           </div>
         )}
+
+        {groceriesEnabled &&
+          navLink("/groceries", "Boodschappen", ShoppingBasket)}
       </nav>
 
       <div className="space-y-1 border-t border-slate-100 pt-4">
