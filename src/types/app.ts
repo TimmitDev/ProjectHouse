@@ -42,6 +42,7 @@ export interface SavingsGoal {
   deadline: string | null;
   color: string;
   icon: string;
+  createdBy: string | null;
 }
 
 export interface SavingsPotEntry {

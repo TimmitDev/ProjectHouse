@@ -122,3 +122,63 @@ export async function createFinancialAgendaItemAction(
   revalidatePath("/finances/agenda");
   return { success: "Agendapost toegevoegd." };
 }
+
+export async function deleteFinancialAgendaItemAction(itemId: string) {
+  if (!itemId) return { error: "Agendapost ontbreekt." };
+
+  const viewer = await getViewer();
+  if (!viewer?.household) {
+    return { error: "Geen huishouden gevonden." };
+  }
+
+  if (isDemoMode) {
+    const cookieStore = await cookies();
+    const items = JSON.parse(
+      cookieStore.get("nestly_demo_financial_agenda")?.value || "[]",
+    ) as FinancialAgendaItem[];
+    const deletedItemIds = JSON.parse(
+      cookieStore.get("nestly_demo_deleted_agenda_items")?.value || "[]",
+    ) as string[];
+
+    cookieStore.set(
+      "nestly_demo_financial_agenda",
+      JSON.stringify(items.filter((item) => item.id !== itemId)),
+      {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      },
+    );
+    cookieStore.set(
+      "nestly_demo_deleted_agenda_items",
+      JSON.stringify(Array.from(new Set([...deletedItemIds, itemId]))),
+      {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      },
+    );
+  } else {
+    if (!isSupabaseConfigured) {
+      return { error: "Supabase is niet geconfigureerd." };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("financial_agenda_items")
+      .delete()
+      .eq("id", itemId)
+      .eq("household_id", viewer.household.id);
+
+    if (error) {
+      return { error: "De agendapost kon niet worden verwijderd." };
+    }
+  }
+
+  revalidatePath("/finances/agenda");
+  return { success: true };
+}

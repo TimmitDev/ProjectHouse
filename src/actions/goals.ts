@@ -62,6 +62,7 @@ export async function createGoalAction(
       deadline: parsed.data.deadline || null,
       color: parsed.data.color,
       icon: "target",
+      createdBy: viewer.profile.id,
     });
     cookieStore.set("nestly_demo_goals", JSON.stringify(goals), {
       httpOnly: true,
@@ -159,4 +160,65 @@ export async function contributeToGoalAction(
   revalidatePath("/finances/goals");
   revalidatePath("/dashboard");
   return { success: "Bijdrage toegevoegd." };
+}
+
+export async function deleteGoalAction(goalId: string) {
+  if (!goalId) return { error: "Spaardoel ontbreekt." };
+
+  const viewer = await getViewer();
+  if (!viewer?.household) {
+    return { error: "Geen huishouden gevonden." };
+  }
+
+  if (isDemoMode) {
+    const cookieStore = await cookies();
+    const goals = JSON.parse(
+      cookieStore.get("nestly_demo_goals")?.value || "[]",
+    ) as SavingsGoal[];
+    const deletedGoalIds = JSON.parse(
+      cookieStore.get("nestly_demo_deleted_goals")?.value || "[]",
+    ) as string[];
+
+    cookieStore.set(
+      "nestly_demo_goals",
+      JSON.stringify(goals.filter((goal) => goal.id !== goalId)),
+      {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      },
+    );
+    cookieStore.set(
+      "nestly_demo_deleted_goals",
+      JSON.stringify(Array.from(new Set([...deletedGoalIds, goalId]))),
+      {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      },
+    );
+  } else {
+    if (!isSupabaseConfigured) {
+      return { error: "Supabase is niet geconfigureerd." };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("savings_goals")
+      .delete()
+      .eq("id", goalId)
+      .eq("household_id", viewer.household.id);
+
+    if (error) {
+      return { error: "Het spaardoel kon niet worden verwijderd." };
+    }
+  }
+
+  revalidatePath("/finances/goals");
+  revalidatePath("/dashboard");
+  return { success: true };
 }

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AddFinancialAgendaItemButton } from "@/components/finances/agenda-form";
+import { DeleteFinancialItemButton } from "@/components/finances/delete-financial-item-button";
 import { Card, PageHeader } from "@/components/ui/card";
 import {
   eachDate,
@@ -70,10 +71,12 @@ function AgendaListItem({
   occurrence,
   currency,
   locale,
+  canDelete,
 }: {
   occurrence: FinancialAgendaOccurrence;
   currency: string;
   locale: string;
+  canDelete: boolean;
 }) {
   const income = occurrence.type === "income";
 
@@ -104,15 +107,25 @@ function AgendaListItem({
               {occurrence.category}
             </p>
           </div>
-          <p
-            className={cn(
-              "shrink-0 text-sm font-semibold",
-              income ? "text-emerald-600" : "text-slate-800",
+          <div className="flex shrink-0 items-start gap-1">
+            <p
+              className={cn(
+                "pt-1 text-sm font-semibold",
+                income ? "text-emerald-600" : "text-slate-800",
+              )}
+            >
+              {income ? "+" : "−"}
+              {formatCurrency(occurrence.amount, currency, locale)}
+            </p>
+            {canDelete && (
+              <DeleteFinancialItemButton
+                id={occurrence.id}
+                name={occurrence.title}
+                type="agenda"
+                recurring={occurrence.recurrence !== "none"}
+              />
             )}
-          >
-            {income ? "+" : "−"}
-            {formatCurrency(occurrence.amount, currency, locale)}
-          </p>
+          </div>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-slate-500">
@@ -145,6 +158,7 @@ export default async function FinancialAgendaPage({
   const viewer = await getViewer();
   if (!viewer?.household) redirect("/onboarding");
   if (!viewer.enabledModules.includes("finances")) redirect("/modules");
+  const householdRole = viewer.household.role;
 
   const params = await searchParams;
   const requestedMonth =
@@ -428,6 +442,10 @@ export default async function FinancialAgendaPage({
                   occurrence={occurrence}
                   currency={currency}
                   locale={locale}
+                  canDelete={
+                    occurrence.createdBy === viewer.profile.id ||
+                    householdRole !== "member"
+                  }
                 />
               ))}
             </div>

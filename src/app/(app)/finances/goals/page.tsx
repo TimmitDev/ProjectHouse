@@ -12,6 +12,7 @@ import {
   ContributeButton,
   CreateGoalButton,
 } from "@/components/finances/goal-actions";
+import { DeleteFinancialItemButton } from "@/components/finances/delete-financial-item-button";
 import { Card, PageHeader } from "@/components/ui/card";
 import { getSavingsGoalsData, getViewer } from "@/lib/data";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
@@ -44,6 +45,7 @@ export default async function SavingsGoalsPage() {
   if (!viewer.enabledModules.includes("finances")) redirect("/modules");
   const goals = await getSavingsGoalsData(viewer);
   const { currency, locale } = viewer.profile;
+  const householdRole = viewer.household.role;
 
   return (
     <div className="space-y-7">
@@ -67,6 +69,9 @@ export default async function SavingsGoalsPage() {
               goal.targetAmount - goal.currentAmount,
             );
             const deadlineLabel = getDeadlineLabel(goal.deadline);
+            const canDelete =
+              householdRole !== "member" ||
+              goal.createdBy === viewer.profile.id;
 
             return (
               <Card
@@ -96,17 +101,29 @@ export default async function SavingsGoalsPage() {
                         <Target className="size-5" />
                       )}
                     </span>
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
-                        complete
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-white/80 bg-white/75 text-slate-600 shadow-sm backdrop-blur-sm",
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                          complete
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            : "border-white/80 bg-white/75 text-slate-600 shadow-sm backdrop-blur-sm",
+                        )}
+                      >
+                        {complete && <CheckCircle2 className="size-3.5" />}
+                        {complete
+                          ? "Doel behaald"
+                          : `${percentage}% voltooid`}
+                      </span>
+                      {canDelete && (
+                        <DeleteFinancialItemButton
+                          id={goal.id}
+                          name={goal.name}
+                          type="goal"
+                          className="bg-white/70 text-slate-400 shadow-sm backdrop-blur-sm"
+                        />
                       )}
-                    >
-                      {complete && <CheckCircle2 className="size-3.5" />}
-                      {complete ? "Doel behaald" : `${percentage}% voltooid`}
-                    </span>
+                    </div>
                   </div>
 
                   <div className="mt-6">

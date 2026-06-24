@@ -58,6 +58,7 @@ type DashboardRpc = {
     deadline: string | null;
     color: string;
     icon: string;
+    created_by?: string | null;
   }>;
   transactions?: Array<{
     id: string;
@@ -309,14 +310,22 @@ async function getDemoDashboardData(): Promise<DashboardData> {
   const customGoals = JSON.parse(
     cookieStore.get("nestly_demo_goals")?.value || "[]",
   ) as SavingsGoal[];
+  const deletedGoalIds = new Set(
+    JSON.parse(
+      cookieStore.get("nestly_demo_deleted_goals")?.value || "[]",
+    ) as string[],
+  );
 
   return {
     ...demoDashboardData,
-    goals: [...demoDashboardData.goals, ...customGoals].map((goal) => ({
-      ...goal,
-      currentAmount:
-        goal.currentAmount + numeric(contributions[goal.id] ?? 0),
-    })),
+    goals: [...demoDashboardData.goals, ...customGoals]
+      .filter((goal) => !deletedGoalIds.has(goal.id))
+      .map((goal) => ({
+        ...goal,
+        createdBy: goal.createdBy ?? null,
+        currentAmount:
+          goal.currentAmount + numeric(contributions[goal.id] ?? 0),
+      })),
   };
 }
 
@@ -362,6 +371,7 @@ function mapDashboardData(
         deadline: goal.deadline,
         color: goal.color,
         icon: goal.icon,
+        createdBy: goal.created_by ?? null,
       })) ?? [],
     transactions:
       data?.transactions?.map((transaction) => ({
@@ -402,7 +412,7 @@ async function getLegacyDashboardData(
     ? supabase
         .from("savings_goals")
         .select(
-          "id, name, target_amount, current_amount, deadline, color, icon",
+          "id, name, target_amount, current_amount, deadline, color, icon, created_by",
         )
         .eq("household_id", householdId)
         .order("created_at", { ascending: false })
@@ -486,6 +496,7 @@ async function getLegacyDashboardData(
         deadline: goal.deadline,
         color: goal.color,
         icon: goal.icon,
+        createdBy: goal.created_by,
       })) ?? [],
     transactions:
       recentTransactions?.map((transaction) => ({
@@ -572,7 +583,7 @@ export const getSavingsGoalsData = cache(
     const { data, error } = await supabase
       .from("savings_goals")
       .select(
-        "id, name, target_amount, current_amount, deadline, color, icon",
+        "id, name, target_amount, current_amount, deadline, color, icon, created_by",
       )
       .eq("household_id", viewer.household.id)
       .order("created_at", { ascending: false });
@@ -590,6 +601,7 @@ export const getSavingsGoalsData = cache(
         deadline: goal.deadline,
         color: goal.color,
         icon: goal.icon,
+        createdBy: goal.created_by,
       })) ?? []
     );
   },
@@ -703,10 +715,18 @@ const getFinancialAgendaDataCached = cache(
       const customItems = JSON.parse(
         cookieStore.get("nestly_demo_financial_agenda")?.value || "[]",
       ) as FinancialAgendaItem[];
+      const deletedItemIds = new Set(
+        JSON.parse(
+          cookieStore.get("nestly_demo_deleted_agenda_items")?.value ||
+            "[]",
+        ) as string[],
+      );
 
       return {
         items: filterDemoAgendaItems(
-          [...demoFinancialAgendaItems, ...customItems],
+          [...demoFinancialAgendaItems, ...customItems].filter(
+            (item) => !deletedItemIds.has(item.id),
+          ),
           rangeStart,
           rangeEnd,
         ),

@@ -58,6 +58,7 @@ export const demoGoals: SavingsGoal[] = [
     deadline: "2026-08-01",
     color: "#52796F",
     icon: "plane",
+    createdBy: "demo-user",
   },
   {
     id: "goal-emergency",
@@ -67,6 +68,7 @@ export const demoGoals: SavingsGoal[] = [
     deadline: "2026-12-31",
     color: "#D49A73",
     icon: "shield",
+    createdBy: "demo-user",
   },
   {
     id: "goal-kitchen",
@@ -76,6 +78,7 @@ export const demoGoals: SavingsGoal[] = [
     deadline: "2027-06-01",
     color: "#6F7FA3",
     icon: "home",
+    createdBy: "demo-member",
   },
 ];
 
