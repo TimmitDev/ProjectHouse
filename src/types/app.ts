@@ -106,6 +106,31 @@ export interface FinancialAgendaData {
   members: HouseholdMember[];
 }
 
+export type CalendarEventCategory =
+  | "home"
+  | "appointment"
+  | "school"
+  | "work"
+  | "social"
+  | "health"
+  | "travel"
+  | "other";
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  eventDate: string;
+  startTime: string | null;
+  endTime: string | null;
+  allDay: boolean;
+  category: CalendarEventCategory;
+  createdBy: string | null;
+  createdByName: string;
+  createdAt: string;
+}
+
 export type GroceryCategory =
   | "produce"
   | "bakery"

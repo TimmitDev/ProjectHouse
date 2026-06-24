@@ -43,6 +43,7 @@ export function AppShell({
   const [groceriesOpen, setGroceriesOpen] = useState(
     pathname.startsWith("/groceries"),
   );
+  const calendarEnabled = viewer.enabledModules.includes("calendar");
   const financesEnabled = viewer.enabledModules.includes("finances");
   const groceriesEnabled = viewer.enabledModules.includes("groceries");
 
@@ -100,6 +101,8 @@ export function AppShell({
         {mainNav.map((item) =>
           navLink(item.href, item.label, item.icon),
         )}
+
+        {calendarEnabled && navLink("/calendar", "Agenda", CalendarDays)}
 
         {financesEnabled && (
           <div>

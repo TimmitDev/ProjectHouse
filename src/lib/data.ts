@@ -3,6 +3,7 @@ import { cache } from "react";
 
 import {
   demoDashboardData,
+  demoCalendarEvents,
   demoFinancialAgendaItems,
   demoGroceryItems,
   demoMealPrepRecipes,
@@ -15,6 +16,7 @@ import { isDemoMode, isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type {
   DashboardData,
+  CalendarEvent,
   FinancialAgendaData,
   FinancialAgendaItem,
   GroceryItem,
@@ -859,6 +861,119 @@ export function getFinancialAgendaData(
     range?.end ?? null,
   );
 }
+
+type DemoCalendarEvents = Record<string, CalendarEvent[]>;
+
+function filterCalendarEvents(
+  events: CalendarEvent[],
+  range?: { start: string; end: string },
+) {
+  return events
+    .filter(
+      (event) =>
+        !range ||
+        (event.eventDate >= range.start && event.eventDate <= range.end),
+    )
+    .sort(
+      (a, b) =>
+        a.eventDate.localeCompare(b.eventDate) ||
+        (a.startTime ?? "").localeCompare(b.startTime ?? "") ||
+        a.title.localeCompare(b.title),
+    );
+}
+
+export const getCalendarEvents = cache(
+  async (
+    viewer: Viewer,
+    range?: { start: string; end: string },
+  ): Promise<CalendarEvent[]> => {
+    if (!viewer.household) return [];
+
+    if (viewer.isDemo) {
+      const cookieStore = await cookies();
+      const raw = cookieStore.get("nestly_demo_calendar_events")?.value;
+
+      if (raw) {
+        try {
+          const eventsByHousehold = JSON.parse(raw) as DemoCalendarEvents;
+          if (eventsByHousehold[viewer.household.id]) {
+            return filterCalendarEvents(
+              eventsByHousehold[viewer.household.id],
+              range,
+            );
+          }
+        } catch {
+          // Fall back to the stable demo events when the cookie is malformed.
+        }
+      }
+
+      return filterCalendarEvents(
+        demoCalendarEvents.map((event) => ({ ...event })),
+        range,
+      );
+    }
+
+    const supabase = await createClient();
+    let eventsQuery = supabase
+      .from("calendar_events")
+      .select(
+        "id, title, description, location, event_date, start_time, end_time, all_day, category, created_by, created_at",
+      )
+      .eq("household_id", viewer.household.id);
+
+    if (range) {
+      eventsQuery = eventsQuery
+        .gte("event_date", range.start)
+        .lte("event_date", range.end);
+    }
+
+    const { data, error } = await eventsQuery
+      .order("event_date", { ascending: true })
+      .order("start_time", { ascending: true, nullsFirst: true })
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw new Error("De gedeelde agenda kon niet worden geladen.");
+    }
+
+    const creatorIds = Array.from(
+      new Set(
+        data
+          ?.map((event) => event.created_by)
+          .filter((id): id is string => Boolean(id)) ?? [],
+      ),
+    );
+    const { data: profiles } = creatorIds.length
+      ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", creatorIds)
+      : { data: [] };
+    const profileNames = new Map(
+      profiles?.map((profile) => [profile.id, profile.full_name]) ?? [],
+    );
+
+    return (
+      data?.map((event) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        location: event.location,
+        eventDate: event.event_date,
+        startTime: event.start_time?.slice(0, 5) ?? null,
+        endTime: event.end_time?.slice(0, 5) ?? null,
+        allDay: event.all_day,
+        category: event.category,
+        createdBy: event.created_by,
+        createdByName:
+          event.created_by === viewer.profile.id
+            ? viewer.profile.fullName
+            : profileNames.get(event.created_by ?? "") || "Huishoudlid",
+        createdAt: event.created_at,
+      })) ?? []
+    );
+  },
+);
 
 type DemoGroceryLists = Record<string, GroceryItem[]>;
 

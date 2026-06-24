@@ -1,5 +1,6 @@
 import type {
   DashboardData,
+  CalendarEvent,
   FinancialAgendaItem,
   GroceryItem,
   Household,
@@ -196,6 +197,51 @@ export const demoFinancialAgendaItems: FinancialAgendaItem[] = [
   },
 ];
 
+export const demoCalendarEvents: CalendarEvent[] = [
+  {
+    id: "calendar-vet",
+    title: "Tandartscontrole",
+    description: "Controle en nieuwe afspraak plannen.",
+    location: "Centrum",
+    eventDate: "2026-06-26",
+    startTime: "09:30",
+    endTime: "10:15",
+    allDay: false,
+    category: "health",
+    createdBy: "demo-user",
+    createdByName: "Alex Morgan",
+    createdAt: "2026-06-20T09:00:00.000Z",
+  },
+  {
+    id: "calendar-family",
+    title: "Familie-etentje",
+    description: "",
+    location: "Thuis",
+    eventDate: "2026-06-29",
+    startTime: "18:30",
+    endTime: null,
+    allDay: false,
+    category: "social",
+    createdBy: "demo-member",
+    createdByName: "Jamie Morgan",
+    createdAt: "2026-06-21T12:00:00.000Z",
+  },
+  {
+    id: "calendar-school",
+    title: "Studiedag",
+    description: "Iedereen houdt rekening met opvang.",
+    location: "",
+    eventDate: "2026-07-03",
+    startTime: null,
+    endTime: null,
+    allDay: true,
+    category: "school",
+    createdBy: "demo-user",
+    createdByName: "Alex Morgan",
+    createdAt: "2026-06-22T08:00:00.000Z",
+  },
+];
+
 export const demoSavingsPots: SavingsPot[] = [
   {
     id: "pot-buffer",
@@ -348,7 +394,7 @@ export const moduleCatalog: Array<{
     name: "Gedeelde agenda",
     description: "Houd iedereen op de hoogte van plannen en afspraken.",
     icon: "calendar",
-    available: false,
+    available: true,
   },
   {
     key: "chores",

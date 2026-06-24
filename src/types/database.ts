@@ -260,6 +260,72 @@ export interface Database {
         };
         Relationships: [];
       };
+      calendar_events: {
+        Row: {
+          id: string;
+          household_id: string;
+          title: string;
+          description: string;
+          location: string;
+          event_date: string;
+          start_time: string | null;
+          end_time: string | null;
+          all_day: boolean;
+          category:
+            | "home"
+            | "appointment"
+            | "school"
+            | "work"
+            | "social"
+            | "health"
+            | "travel"
+            | "other";
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          title: string;
+          description?: string;
+          location?: string;
+          event_date: string;
+          start_time?: string | null;
+          end_time?: string | null;
+          all_day?: boolean;
+          category?:
+            | "home"
+            | "appointment"
+            | "school"
+            | "work"
+            | "social"
+            | "health"
+            | "travel"
+            | "other";
+          created_by?: string | null;
+        };
+        Update: {
+          title?: string;
+          description?: string;
+          location?: string;
+          event_date?: string;
+          start_time?: string | null;
+          end_time?: string | null;
+          all_day?: boolean;
+          category?:
+            | "home"
+            | "appointment"
+            | "school"
+            | "work"
+            | "social"
+            | "health"
+            | "travel"
+            | "other";
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       grocery_items: {
         Row: {
           id: string;

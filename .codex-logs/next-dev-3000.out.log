@@ -13,3 +13,6 @@ Creating turbopack project {
 }
 
  GET /finances/reports 307 in 1441ms (next.js: 936ms, proxy.ts: 222ms, application-code: 282ms)
+✓ Compiled in 68ms
+✓ Compiled in 77ms
+ GET /calendar 307 in 829ms (next.js: 642ms, proxy.ts: 49ms, application-code: 138ms)
