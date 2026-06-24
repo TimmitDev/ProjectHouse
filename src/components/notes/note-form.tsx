@@ -81,7 +81,7 @@ export function AddNoteButton() {
             <input
               type="checkbox"
               name="pinned"
-              className="size-4 rounded border-slate-300 text-[var(--accent)] focus:ring-[var(--accent)]"
+              className="size-4 rounded border-slate-300 accent-[var(--accent)] focus:ring-[var(--accent)]"
             />
             Bovenaan vastzetten
           </label>
@@ -98,4 +98,3 @@ export function AddNoteButton() {
     </>
   );
 }
-

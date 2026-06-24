@@ -65,10 +65,19 @@ export async function toggleModuleAction(
     );
 
     if (error) {
-      return { error: "De module kon niet worden bijgewerkt." };
+      const missingNotesModule =
+        moduleKey === "notes" &&
+        /notes|module_key|enum|invalid input value/i.test(error.message);
+
+      return {
+        error: missingNotesModule
+          ? "De notitiesmodule staat nog niet goed in de database. Draai de nieuwste migraties en probeer opnieuw."
+          : "De module kon niet worden bijgewerkt.",
+      };
     }
   }
 
   revalidatePath("/", "layout");
+  revalidatePath("/modules");
   return { success: true };
 }

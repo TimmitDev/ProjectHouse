@@ -41,15 +41,20 @@ export function ModuleCard({
   const Icon = icons[module.icon];
   const router = useRouter();
   const [checked, setChecked] = useState(enabled);
+  const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
 
   function toggle() {
     if (!canManage || !module.available || pending) return;
     const nextValue = !checked;
+    setError(undefined);
     setChecked(nextValue);
     startTransition(async () => {
       const result = await toggleModuleAction(module.key, nextValue);
-      if (result.error) setChecked(!nextValue);
+      if (result.error) {
+        setChecked(!nextValue);
+        setError(result.error);
+      }
       router.refresh();
     });
   }
@@ -106,6 +111,11 @@ export function ModuleCard({
               ? "Niet actief"
               : "In ontwikkeling"}
       </p>
+      {error && (
+        <p className="mt-2 rounded-lg bg-red-50 px-2.5 py-2 text-xs leading-5 text-red-700">
+          {error}
+        </p>
+      )}
     </Card>
   );
 }
