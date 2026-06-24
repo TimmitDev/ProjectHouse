@@ -2,28 +2,18 @@ import type {
   FinancialAgendaItem,
   FinancialAgendaOccurrence,
 } from "@/types/app";
+import {
+  getBudgetMonthKeyForDate,
+  getBudgetPeriodForMonth,
+  parseDateOnly,
+  shiftBudgetMonth,
+  toDateOnly,
+} from "@/lib/budget-period";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-function parseDateOnly(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day));
-}
-
-function toDateOnly(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
 function budgetMonthForDate(date: Date, monthOffset: 0 | 1) {
-  return new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth() + monthOffset,
-      1,
-    ),
-  )
-    .toISOString()
-    .slice(0, 7);
+  return getBudgetMonthKeyForDate(date, monthOffset);
 }
 
 function daysInMonth(year: number, monthIndex: number) {
@@ -150,27 +140,18 @@ export function expandFinancialAgendaItems(
 }
 
 export function getMonthRange(monthKey: string) {
-  const isValid = /^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey);
-  const safeKey = isValid ? monthKey : new Date().toISOString().slice(0, 7);
-  const [year, month] = safeKey.split("-").map(Number);
-  const start = new Date(Date.UTC(year, month - 1, 1));
-  const end = new Date(Date.UTC(year, month, 0));
+  const period = getBudgetPeriodForMonth(monthKey);
 
   return {
-    key: safeKey,
-    start: toDateOnly(start),
-    end: toDateOnly(end),
-    date: start,
+    key: period.key,
+    start: period.start,
+    end: period.end,
+    date: parseDateOnly(period.start),
   };
 }
 
 export function shiftMonth(monthKey: string, amount: number) {
-  const { date } = getMonthRange(monthKey);
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + amount, 1),
-  )
-    .toISOString()
-    .slice(0, 7);
+  return shiftBudgetMonth(monthKey, amount);
 }
 
 export function getCalendarRange(monthKey: string) {

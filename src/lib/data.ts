@@ -10,6 +10,7 @@ import {
   demoHouseholds,
   demoViewer,
 } from "@/lib/demo-data";
+import { getCurrentBudgetPeriod } from "@/lib/budget-period";
 import { isDemoMode, isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -50,6 +51,9 @@ type DashboardRpc = {
   total_expenses?: number | string;
   monthly_income?: number | string;
   monthly_expenses?: number | string;
+  budget_start?: string;
+  budget_end?: string;
+  budget_key?: string;
   goals?: Array<{
     id: string;
     name: string;
@@ -318,6 +322,7 @@ async function getDemoDashboardData(): Promise<DashboardData> {
 
   return {
     ...demoDashboardData,
+    budgetPeriod: getCurrentBudgetPeriod(),
     goals: [...demoDashboardData.goals, ...customGoals]
       .filter((goal) => !deletedGoalIds.has(goal.id))
       .map((goal) => ({
@@ -332,6 +337,7 @@ async function getDemoDashboardData(): Promise<DashboardData> {
 function emptyDashboardData(): DashboardData {
   return {
     balance: 0,
+    budgetPeriod: getCurrentBudgetPeriod(),
     monthlyIncome: 0,
     monthlyExpenses: 0,
     monthlySavings: 0,
@@ -350,9 +356,15 @@ function mapDashboardData(
   const totalExpenses = numeric(data?.total_expenses);
   const monthlyIncome = numeric(data?.monthly_income);
   const monthlyExpenses = numeric(data?.monthly_expenses);
+  const currentBudgetPeriod = getCurrentBudgetPeriod();
 
   return {
     balance: totalIncome - totalExpenses,
+    budgetPeriod: {
+      key: data?.budget_key ?? currentBudgetPeriod.key,
+      start: data?.budget_start ?? currentBudgetPeriod.start,
+      end: data?.budget_end ?? currentBudgetPeriod.end,
+    },
     monthlyIncome,
     monthlyExpenses,
     monthlySavings: Math.max(0, monthlyIncome - monthlyExpenses),
@@ -401,12 +413,7 @@ async function getLegacyDashboardData(
 
   const supabase = await createClient();
   const householdId = viewer.household.id;
-  const now = new Date();
-  const monthStart = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
-  )
-    .toISOString()
-    .slice(0, 10);
+  const budgetPeriod = getCurrentBudgetPeriod();
 
   const goalsQuery = includeGoals
     ? supabase
@@ -453,7 +460,9 @@ async function getLegacyDashboardData(
         .in("id", memberIds)
     : { data: [] };
   const monthly = allTransactions?.filter(
-    (transaction) => transaction.transaction_date >= monthStart,
+    (transaction) =>
+      transaction.transaction_date >= budgetPeriod.start &&
+      transaction.transaction_date <= budgetPeriod.end,
   );
   const monthlyIncome =
     monthly
@@ -478,6 +487,7 @@ async function getLegacyDashboardData(
 
   return {
     balance: totalIncome - totalExpenses,
+    budgetPeriod,
     monthlyIncome,
     monthlyExpenses,
     monthlySavings: Math.max(0, monthlyIncome - monthlyExpenses),

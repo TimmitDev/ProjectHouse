@@ -74,6 +74,12 @@ export interface Transaction {
   type: "income" | "expense";
 }
 
+export interface BudgetPeriod {
+  key: string;
+  start: string;
+  end: string;
+}
+
 export type FinancialRecurrence = "none" | "weekly" | "monthly" | "yearly";
 
 export interface FinancialAgendaItem {
@@ -145,6 +151,7 @@ export interface MealPrepRecipe {
 
 export interface DashboardData {
   balance: number;
+  budgetPeriod: BudgetPeriod;
   monthlyIncome: number;
   monthlyExpenses: number;
   monthlySavings: number;

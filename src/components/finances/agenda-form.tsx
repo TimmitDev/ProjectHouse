@@ -117,13 +117,13 @@ export function AddFinancialAgendaItemButton({
             </Field>
           </div>
           <Field
-            label="Voor welke maand telt dit bedrag?"
+            label="Voor welke budgetperiode telt dit bedrag?"
             error={state.fieldErrors?.budgetMonthOffset?.[0]}
-            hint="Handig voor salaris dat aan het einde van de vorige maand wordt uitbetaald."
+            hint="De budgetmaand loopt van de 24e t/m de 23e. Gebruik volgende budgetperiode alleen voor bedragen die eerder binnenkomen."
           >
             <Select name="budgetMonthOffset" defaultValue="0">
-              <option value="0">De maand van de betaaldatum</option>
-              <option value="1">De volgende maand</option>
+              <option value="0">Budgetperiode van de betaaldatum</option>
+              <option value="1">Volgende budgetperiode</option>
             </Select>
           </Field>
           <div className="flex justify-end gap-3 pt-2">

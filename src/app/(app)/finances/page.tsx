@@ -9,6 +9,7 @@ import {
 } from "@/components/dashboard/widgets";
 import { AddTransactionButton } from "@/components/finances/transaction-form";
 import { Card, PageHeader } from "@/components/ui/card";
+import { formatBudgetPeriod } from "@/lib/budget-period";
 import { getFinanceOverviewData, getViewer } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ export default async function FinancesPage() {
   if (!viewer.enabledModules.includes("finances")) redirect("/modules");
   const data = await getFinanceOverviewData(viewer);
   const { currency, locale } = viewer.profile;
+  const budgetPeriodLabel = formatBudgetPeriod(data.budgetPeriod, locale);
 
   return (
     <div className="space-y-7">
@@ -38,19 +40,19 @@ export default async function FinancesPage() {
           type="balance"
         />
         <StatCard
-          label="Maandelijkse inkomsten"
+          label="Inkomsten budgetmaand"
           value={formatCurrency(data.monthlyIncome, currency, locale)}
-          meta="Deze maand"
+          meta={budgetPeriodLabel}
           type="income"
         />
         <StatCard
-          label="Maandelijkse uitgaven"
+          label="Uitgaven budgetmaand"
           value={formatCurrency(data.monthlyExpenses, currency, locale)}
-          meta="Deze maand"
+          meta={budgetPeriodLabel}
           type="expenses"
         />
         <StatCard
-          label="Maandelijks gespaard"
+          label="Gespaard budgetmaand"
           value={formatCurrency(data.monthlySavings, currency, locale)}
           meta={`${Math.max(0, data.savingsRate)}% spaarquote`}
           type="savings"
@@ -62,10 +64,10 @@ export default async function FinancesPage() {
         <Card className="p-5 sm:p-6">
           <div className="mb-6">
             <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-              Deze maand
+              Budgetmaand
             </h2>
             <p className="mt-1 text-xs text-slate-400">
-              Een eenvoudig overzicht van waar het geld naartoe gaat.
+              {budgetPeriodLabel}
             </p>
           </div>
           <SpendingBars

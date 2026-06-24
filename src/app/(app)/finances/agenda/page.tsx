@@ -21,6 +21,10 @@ import {
   getMonthRange,
   shiftMonth,
 } from "@/lib/finance-agenda";
+import {
+  formatBudgetPeriod,
+  getCurrentBudgetMonthKey,
+} from "@/lib/budget-period";
 import { getFinancialAgendaData, getViewer } from "@/lib/data";
 import { cn, formatCurrency } from "@/lib/utils";
 import type {
@@ -55,16 +59,8 @@ function formatAgendaDate(value: string, locale: string) {
   return formatter.format(new Date(`${value}T00:00:00Z`));
 }
 
-function formatBudgetMonth(
-  value: string,
-  locale: string,
-  includeYear = true,
-) {
-  return new Intl.DateTimeFormat(locale, {
-    month: includeYear ? "long" : "short",
-    year: includeYear ? "numeric" : undefined,
-    timeZone: "UTC",
-  }).format(new Date(`${value}-01T00:00:00Z`));
+function formatBudgetMonth(value: string, locale: string) {
+  return formatBudgetPeriod(getMonthRange(value), locale);
 }
 
 function AgendaListItem({
@@ -162,7 +158,7 @@ export default async function FinancialAgendaPage({
 
   const params = await searchParams;
   const requestedMonth =
-    params.month || new Date().toISOString().slice(0, 7);
+    params.month || getCurrentBudgetMonthKey();
   const month = getMonthRange(requestedMonth);
   const calendarRange = getCalendarRange(month.key);
   const previousMonth = getMonthRange(shiftMonth(month.key, -1));
@@ -207,11 +203,7 @@ export default async function FinancialAgendaPage({
       .filter((item) => item.recurrence !== "none")
       .map((item) => item.id),
   ).size;
-  const monthLabel = new Intl.DateTimeFormat(locale, {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(month.date);
+  const budgetPeriodLabel = formatBudgetPeriod(month, locale);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -261,7 +253,7 @@ export default async function FinancialAgendaPage({
               {formatCurrency(stat.value, currency, locale)}
             </p>
             <p className="mt-1 text-xs capitalize text-slate-400">
-              {monthLabel}
+              {budgetPeriodLabel}
             </p>
           </Card>
         ))}
@@ -272,7 +264,9 @@ export default async function FinancialAgendaPage({
           <p className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-slate-950">
             {recurringCount}
           </p>
-          <p className="mt-1 text-xs text-slate-400">Actief in deze maand</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Actief in deze budgetmaand
+          </p>
         </Card>
       </section>
 
@@ -281,7 +275,7 @@ export default async function FinancialAgendaPage({
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-6">
             <div className="min-w-0">
               <h2 className="font-semibold capitalize tracking-[-0.02em] text-slate-900">
-                {monthLabel}
+                {budgetPeriodLabel}
               </h2>
               <p className="mt-0.5 hidden text-xs text-slate-400 sm:block">
                 Alle geplande bedragen per dag
@@ -324,7 +318,7 @@ export default async function FinancialAgendaPage({
           <div className="grid grid-cols-7">
             {calendarDates.map((date, index) => {
               const dayOccurrences = occurrencesByDate.get(date) ?? [];
-              const inMonth = date.startsWith(month.key);
+              const inMonth = date >= month.start && date <= month.end;
               const isToday = date === today;
 
               return (
@@ -401,7 +395,6 @@ export default async function FinancialAgendaPage({
                             {formatBudgetMonth(
                               occurrence.budgetMonth,
                               locale,
-                              false,
                             )}
                           </p>
                         )}
@@ -423,7 +416,7 @@ export default async function FinancialAgendaPage({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-                Posten deze maand
+                Posten deze budgetmaand
               </h2>
               <p className="mt-1 text-xs text-slate-400">
                 Inclusief verantwoordelijke
@@ -459,7 +452,7 @@ export default async function FinancialAgendaPage({
                   Nog niets gepland
                 </p>
                 <p className="mt-1 max-w-56 text-xs leading-5 text-slate-400">
-                  Voeg een bedrag toe om deze maand vooruit te plannen.
+                  Voeg een bedrag toe om deze budgetmaand vooruit te plannen.
                 </p>
               </div>
             </div>

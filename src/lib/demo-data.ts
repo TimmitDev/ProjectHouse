@@ -9,6 +9,7 @@ import type {
   SavingsPot,
   Viewer,
 } from "@/types/app";
+import { getCurrentBudgetPeriod } from "@/lib/budget-period";
 
 export const demoHouseholds: Household[] = [
   {
@@ -84,6 +85,7 @@ export const demoGoals: SavingsGoal[] = [
 
 export const demoDashboardData: DashboardData = {
   balance: 12480,
+  budgetPeriod: getCurrentBudgetPeriod(),
   monthlyIncome: 6840,
   monthlyExpenses: 4210,
   monthlySavings: 2630,
@@ -174,7 +176,7 @@ export const demoFinancialAgendaItems: FinancialAgendaItem[] = [
     type: "income",
     dueDate: "2026-01-25",
     recurrence: "monthly",
-    budgetMonthOffset: 1,
+    budgetMonthOffset: 0,
     assignedTo: "demo-user",
     assignedToName: "Alex Morgan",
     createdBy: "demo-user",

@@ -16,6 +16,7 @@ import {
 } from "@/components/dashboard/widgets";
 import { InviteCode } from "@/components/household/invite-code";
 import { Card, PageHeader } from "@/components/ui/card";
+import { formatBudgetPeriod } from "@/lib/budget-period";
 import { getDashboardData, getViewer } from "@/lib/data";
 import {
   formatCurrency,
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
   if (!viewer?.household) redirect("/onboarding");
   const data = await getDashboardData(viewer);
   const { currency, locale } = viewer.profile;
+  const budgetPeriodLabel = formatBudgetPeriod(data.budgetPeriod, locale);
 
   return (
     <div className="space-y-7">
@@ -57,19 +59,19 @@ export default async function DashboardPage() {
           type="balance"
         />
         <StatCard
-          label="Inkomsten deze maand"
+          label="Inkomsten budgetmaand"
           value={formatCurrency(data.monthlyIncome, currency, locale)}
-          meta="Deze maand"
+          meta={budgetPeriodLabel}
           type="income"
         />
         <StatCard
-          label="Uitgaven deze maand"
+          label="Uitgaven budgetmaand"
           value={formatCurrency(data.monthlyExpenses, currency, locale)}
-          meta="Deze maand"
+          meta={budgetPeriodLabel}
           type="expenses"
         />
         <StatCard
-          label="Gespaard deze maand"
+          label="Gespaard budgetmaand"
           value={formatCurrency(data.monthlySavings, currency, locale)}
           meta={`${Math.max(0, data.savingsRate)}% spaarquote`}
           type="savings"
@@ -82,14 +84,14 @@ export default async function DashboardPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="font-semibold tracking-[-0.02em] text-slate-900">
-                Maandoverzicht
+                Budgetmaand
               </h2>
               <p className="mt-1 text-xs text-slate-400">
                 Inkomsten, uitgaven en wat er overblijft om te sparen.
               </p>
             </div>
             <span className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-500">
-              Deze maand
+              {budgetPeriodLabel}
             </span>
           </div>
           <SpendingBars
@@ -117,7 +119,7 @@ export default async function DashboardPage() {
                   />
                 </div>
                 <p className="mt-2 text-right text-[11px] text-slate-400">
-                  van het maandelijkse huishoudinkomen
+                  van het budgetinkomen
                 </p>
               </div>
             </div>
