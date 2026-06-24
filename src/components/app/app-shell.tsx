@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   PiggyBank,
+  ReceiptText,
   ShoppingBasket,
   WalletCards,
   X,
@@ -129,6 +130,12 @@ export function AppShell({
                   "/finances/agenda",
                   "Agenda",
                   CalendarDays,
+                  true,
+                )}
+                {navLink(
+                  "/finances/reports",
+                  "Rapporten",
+                  ReceiptText,
                   true,
                 )}
                 {navLink("/finances/goals", "Spaardoelen", Goal, true)}
