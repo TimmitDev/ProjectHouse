@@ -13,6 +13,7 @@ const validModules: ModuleKey[] = [
   "calendar",
   "chores",
   "groceries",
+  "notes",
 ];
 
 export async function toggleModuleAction(

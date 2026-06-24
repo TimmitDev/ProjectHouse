@@ -7,7 +7,9 @@ import {
   CookingPot,
   Goal,
   LayoutDashboard,
+  ListChecks,
   Menu,
+  NotebookText,
   PiggyBank,
   ReceiptText,
   ShoppingBasket,
@@ -44,8 +46,10 @@ export function AppShell({
     pathname.startsWith("/groceries"),
   );
   const calendarEnabled = viewer.enabledModules.includes("calendar");
+  const choresEnabled = viewer.enabledModules.includes("chores");
   const financesEnabled = viewer.enabledModules.includes("finances");
   const groceriesEnabled = viewer.enabledModules.includes("groceries");
+  const notesEnabled = viewer.enabledModules.includes("notes");
 
   const navLink = (
     href: string,
@@ -103,6 +107,10 @@ export function AppShell({
         )}
 
         {calendarEnabled && navLink("/calendar", "Agenda", CalendarDays)}
+
+        {choresEnabled && navLink("/chores", "Taken", ListChecks)}
+
+        {notesEnabled && navLink("/notes", "Notities", NotebookText)}
 
         {financesEnabled && (
           <div>

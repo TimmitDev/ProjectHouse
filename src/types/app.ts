@@ -1,6 +1,11 @@
 export type HouseholdRole = "owner" | "admin" | "member";
 
-export type ModuleKey = "finances" | "calendar" | "chores" | "groceries";
+export type ModuleKey =
+  | "finances"
+  | "calendar"
+  | "chores"
+  | "groceries"
+  | "notes";
 
 export interface Profile {
   id: string;
@@ -129,6 +134,65 @@ export interface CalendarEvent {
   createdBy: string | null;
   createdByName: string;
   createdAt: string;
+}
+
+export type ChoreArea =
+  | "kitchen"
+  | "bathroom"
+  | "living"
+  | "bedroom"
+  | "outside"
+  | "admin"
+  | "other";
+
+export type ChoreFrequency =
+  | "once"
+  | "daily"
+  | "weekly"
+  | "biweekly"
+  | "monthly";
+
+export interface HouseholdChore {
+  id: string;
+  title: string;
+  description: string;
+  area: ChoreArea;
+  frequency: ChoreFrequency;
+  dueDate: string;
+  assignedTo: string | null;
+  assignedToName: string;
+  completedAt: string | null;
+  completedBy: string | null;
+  lastCompletedAt: string | null;
+  lastCompletedBy: string | null;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+export interface ChoresData {
+  chores: HouseholdChore[];
+  members: HouseholdMember[];
+}
+
+export type HouseholdNoteCategory =
+  | "general"
+  | "home"
+  | "finance"
+  | "shopping"
+  | "maintenance"
+  | "important"
+  | "other";
+
+export interface HouseholdNote {
+  id: string;
+  title: string;
+  body: string;
+  category: HouseholdNoteCategory;
+  pinned: boolean;
+  createdBy: string | null;
+  createdByName: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type GroceryCategory =

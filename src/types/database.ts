@@ -82,13 +82,23 @@ export interface Database {
       household_modules: {
         Row: {
           household_id: string;
-          module_key: "finances" | "calendar" | "chores" | "groceries";
+          module_key:
+            | "finances"
+            | "calendar"
+            | "chores"
+            | "groceries"
+            | "notes";
           enabled: boolean;
           updated_at: string;
         };
         Insert: {
           household_id: string;
-          module_key: "finances" | "calendar" | "chores" | "groceries";
+          module_key:
+            | "finances"
+            | "calendar"
+            | "chores"
+            | "groceries"
+            | "notes";
           enabled?: boolean;
           updated_at?: string;
         };
@@ -322,6 +332,126 @@ export interface Database {
             | "health"
             | "travel"
             | "other";
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      household_chores: {
+        Row: {
+          id: string;
+          household_id: string;
+          title: string;
+          description: string;
+          area:
+            | "kitchen"
+            | "bathroom"
+            | "living"
+            | "bedroom"
+            | "outside"
+            | "admin"
+            | "other";
+          frequency: "once" | "daily" | "weekly" | "biweekly" | "monthly";
+          due_date: string;
+          assigned_to: string | null;
+          completed_at: string | null;
+          completed_by: string | null;
+          last_completed_at: string | null;
+          last_completed_by: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          title: string;
+          description?: string;
+          area?:
+            | "kitchen"
+            | "bathroom"
+            | "living"
+            | "bedroom"
+            | "outside"
+            | "admin"
+            | "other";
+          frequency?: "once" | "daily" | "weekly" | "biweekly" | "monthly";
+          due_date?: string;
+          assigned_to?: string | null;
+          completed_at?: string | null;
+          completed_by?: string | null;
+          last_completed_at?: string | null;
+          last_completed_by?: string | null;
+          created_by?: string | null;
+        };
+        Update: {
+          title?: string;
+          description?: string;
+          area?:
+            | "kitchen"
+            | "bathroom"
+            | "living"
+            | "bedroom"
+            | "outside"
+            | "admin"
+            | "other";
+          frequency?: "once" | "daily" | "weekly" | "biweekly" | "monthly";
+          due_date?: string;
+          assigned_to?: string | null;
+          completed_at?: string | null;
+          completed_by?: string | null;
+          last_completed_at?: string | null;
+          last_completed_by?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      household_notes: {
+        Row: {
+          id: string;
+          household_id: string;
+          title: string;
+          body: string;
+          category:
+            | "general"
+            | "home"
+            | "finance"
+            | "shopping"
+            | "maintenance"
+            | "important"
+            | "other";
+          pinned: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          title: string;
+          body: string;
+          category?:
+            | "general"
+            | "home"
+            | "finance"
+            | "shopping"
+            | "maintenance"
+            | "important"
+            | "other";
+          pinned?: boolean;
+          created_by?: string | null;
+        };
+        Update: {
+          title?: string;
+          body?: string;
+          category?:
+            | "general"
+            | "home"
+            | "finance"
+            | "shopping"
+            | "maintenance"
+            | "important"
+            | "other";
+          pinned?: boolean;
           updated_at?: string;
         };
         Relationships: [];

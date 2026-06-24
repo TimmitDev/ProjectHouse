@@ -4,6 +4,8 @@ import type {
   FinancialAgendaItem,
   GroceryItem,
   Household,
+  HouseholdChore,
+  HouseholdNote,
   MealPrepRecipe,
   ModuleKey,
   SavingsGoal,
@@ -242,6 +244,82 @@ export const demoCalendarEvents: CalendarEvent[] = [
   },
 ];
 
+export const demoHouseholdChores: HouseholdChore[] = [
+  {
+    id: "chore-kitchen",
+    title: "Keuken opruimen",
+    description: "Aanrecht leeg, vaatwasser aan en afval checken.",
+    area: "kitchen",
+    frequency: "daily",
+    dueDate: "2026-06-24",
+    assignedTo: "demo-user",
+    assignedToName: "Alex Morgan",
+    completedAt: null,
+    completedBy: null,
+    lastCompletedAt: "2026-06-23T19:00:00.000Z",
+    lastCompletedBy: "demo-member",
+    createdBy: "demo-user",
+    createdAt: "2026-06-20T09:00:00.000Z",
+  },
+  {
+    id: "chore-bathroom",
+    title: "Badkamer schoonmaken",
+    description: "Wastafel, douchewand en vloer meenemen.",
+    area: "bathroom",
+    frequency: "weekly",
+    dueDate: "2026-06-27",
+    assignedTo: "demo-member",
+    assignedToName: "Jamie Morgan",
+    completedAt: null,
+    completedBy: null,
+    lastCompletedAt: "2026-06-20T10:30:00.000Z",
+    lastCompletedBy: "demo-user",
+    createdBy: "demo-user",
+    createdAt: "2026-06-19T14:00:00.000Z",
+  },
+  {
+    id: "chore-meter",
+    title: "Meterstanden doorgeven",
+    description: "",
+    area: "admin",
+    frequency: "monthly",
+    dueDate: "2026-07-01",
+    assignedTo: null,
+    assignedToName: "Iedereen",
+    completedAt: null,
+    completedBy: null,
+    lastCompletedAt: null,
+    lastCompletedBy: null,
+    createdBy: "demo-member",
+    createdAt: "2026-06-18T08:00:00.000Z",
+  },
+];
+
+export const demoHouseholdNotes: HouseholdNote[] = [
+  {
+    id: "note-wifi",
+    title: "Wifi en huiscodes",
+    body: "Wifi: Nestly thuis. De logeerkamer sleutel ligt in het bakje bij de deur.",
+    category: "home",
+    pinned: true,
+    createdBy: "demo-user",
+    createdByName: "Alex Morgan",
+    createdAt: "2026-06-15T09:00:00.000Z",
+    updatedAt: "2026-06-15T09:00:00.000Z",
+  },
+  {
+    id: "note-cleaner",
+    title: "Onderhoud cv",
+    body: "Voor oktober een afspraak plannen voor onderhoud. Vorige keer was installateur Van Dijk.",
+    category: "maintenance",
+    pinned: false,
+    createdBy: "demo-member",
+    createdByName: "Jamie Morgan",
+    createdAt: "2026-06-18T11:00:00.000Z",
+    updatedAt: "2026-06-18T11:00:00.000Z",
+  },
+];
+
 export const demoSavingsPots: SavingsPot[] = [
   {
     id: "pot-buffer",
@@ -379,7 +457,7 @@ export const moduleCatalog: Array<{
   key: ModuleKey;
   name: string;
   description: string;
-  icon: "wallet" | "calendar" | "sparkles" | "shopping";
+  icon: "wallet" | "calendar" | "sparkles" | "shopping" | "notes";
   available: boolean;
 }> = [
   {
@@ -401,7 +479,14 @@ export const moduleCatalog: Array<{
     name: "Huishoudelijke taken",
     description: "Verdeel terugkerende taken en deel het werk.",
     icon: "sparkles",
-    available: false,
+    available: true,
+  },
+  {
+    key: "notes",
+    name: "Notities",
+    description: "Bewaar huisinfo, afspraken en korte geheugensteuntjes.",
+    icon: "notes",
+    available: true,
   },
   {
     key: "groceries",

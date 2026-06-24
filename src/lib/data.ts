@@ -6,6 +6,8 @@ import {
   demoCalendarEvents,
   demoFinancialAgendaItems,
   demoGroceryItems,
+  demoHouseholdChores,
+  demoHouseholdNotes,
   demoMealPrepRecipes,
   demoSavingsPots,
   demoHouseholds,
@@ -17,11 +19,14 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   DashboardData,
   CalendarEvent,
+  ChoresData,
   FinancialAgendaData,
   FinancialAgendaItem,
   GroceryItem,
   Household,
+  HouseholdChore,
   HouseholdMember,
+  HouseholdNote,
   ModuleKey,
   MealPrepRecipe,
   SavingsPot,
@@ -971,6 +976,202 @@ export const getCalendarEvents = cache(
             : profileNames.get(event.created_by ?? "") || "Huishoudlid",
         createdAt: event.created_at,
       })) ?? []
+    );
+  },
+);
+
+type DemoChoreLists = Record<string, HouseholdChore[]>;
+
+function sortChores(chores: HouseholdChore[]) {
+  return [...chores].sort(
+    (a, b) =>
+      Number(Boolean(a.completedAt)) - Number(Boolean(b.completedAt)) ||
+      a.dueDate.localeCompare(b.dueDate) ||
+      a.title.localeCompare(b.title),
+  );
+}
+
+export const getChoresData = cache(
+  async (viewer: Viewer): Promise<ChoresData> => {
+    if (!viewer.household) return { chores: [], members: [] };
+
+    if (viewer.isDemo) {
+      const cookieStore = await cookies();
+      const raw = cookieStore.get("nestly_demo_chores")?.value;
+
+      if (raw) {
+        try {
+          const choresByHousehold = JSON.parse(raw) as DemoChoreLists;
+          if (choresByHousehold[viewer.household.id]) {
+            return {
+              chores: sortChores(choresByHousehold[viewer.household.id]),
+              members: demoDashboardData.members,
+            };
+          }
+        } catch {
+          // Fall back to the stable demo chores when the cookie is malformed.
+        }
+      }
+
+      return {
+        chores: sortChores(demoHouseholdChores.map((chore) => ({ ...chore }))),
+        members: demoDashboardData.members,
+      };
+    }
+
+    const supabase = await createClient();
+    const [{ data: chores, error: choresError }, { data: memberships }] =
+      await Promise.all([
+        supabase
+          .from("household_chores")
+          .select(
+            "id, title, description, area, frequency, due_date, assigned_to, completed_at, completed_by, last_completed_at, last_completed_by, created_by, created_at",
+          )
+          .eq("household_id", viewer.household.id)
+          .order("due_date", { ascending: true })
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("household_members")
+          .select("user_id, role")
+          .eq("household_id", viewer.household.id),
+      ]);
+
+    if (choresError) {
+      throw new Error("De huishoudelijke taken konden niet worden geladen.");
+    }
+
+    const memberIds = memberships?.map((member) => member.user_id) ?? [];
+    const profileIds = Array.from(
+      new Set([
+        ...memberIds,
+        ...(chores
+          ?.map((chore) => chore.assigned_to)
+          .filter((id): id is string => Boolean(id)) ?? []),
+      ]),
+    );
+    const { data: profiles } = profileIds.length
+      ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", profileIds)
+      : { data: [] };
+    const profileNames = new Map(
+      profiles?.map((profile) => [profile.id, profile.full_name]) ?? [],
+    );
+    const members =
+      memberships?.map((member) => ({
+        id: member.user_id,
+        name:
+          member.user_id === viewer.profile.id
+            ? viewer.profile.fullName
+            : profileNames.get(member.user_id) || "Huishoudlid",
+        email: member.user_id === viewer.profile.id ? viewer.profile.email : "",
+        role: member.role,
+      })) ?? [];
+
+    return {
+      chores: sortChores(
+        chores?.map((chore) => ({
+          id: chore.id,
+          title: chore.title,
+          description: chore.description,
+          area: chore.area,
+          frequency: chore.frequency,
+          dueDate: chore.due_date,
+          assignedTo: chore.assigned_to,
+          assignedToName: chore.assigned_to
+            ? profileNames.get(chore.assigned_to) || "Huishoudlid"
+            : "Iedereen",
+          completedAt: chore.completed_at,
+          completedBy: chore.completed_by,
+          lastCompletedAt: chore.last_completed_at,
+          lastCompletedBy: chore.last_completed_by,
+          createdBy: chore.created_by,
+          createdAt: chore.created_at,
+        })) ?? [],
+      ),
+      members,
+    };
+  },
+);
+
+type DemoNoteLists = Record<string, HouseholdNote[]>;
+
+function sortNotes(notes: HouseholdNote[]) {
+  return [...notes].sort(
+    (a, b) =>
+      Number(b.pinned) - Number(a.pinned) ||
+      b.updatedAt.localeCompare(a.updatedAt) ||
+      a.title.localeCompare(b.title),
+  );
+}
+
+export const getHouseholdNotes = cache(
+  async (viewer: Viewer): Promise<HouseholdNote[]> => {
+    if (!viewer.household) return [];
+
+    if (viewer.isDemo) {
+      const cookieStore = await cookies();
+      const raw = cookieStore.get("nestly_demo_notes")?.value;
+
+      if (raw) {
+        try {
+          const notesByHousehold = JSON.parse(raw) as DemoNoteLists;
+          if (notesByHousehold[viewer.household.id]) {
+            return sortNotes(notesByHousehold[viewer.household.id]);
+          }
+        } catch {
+          // Fall back to the stable demo notes when the cookie is malformed.
+        }
+      }
+
+      return sortNotes(demoHouseholdNotes.map((note) => ({ ...note })));
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("household_notes")
+      .select("id, title, body, category, pinned, created_by, created_at, updated_at")
+      .eq("household_id", viewer.household.id)
+      .order("pinned", { ascending: false })
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      throw new Error("De notities konden niet worden geladen.");
+    }
+
+    const creatorIds = Array.from(
+      new Set(
+        data
+          ?.map((note) => note.created_by)
+          .filter((id): id is string => Boolean(id)) ?? [],
+      ),
+    );
+    const { data: profiles } = creatorIds.length
+      ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", creatorIds)
+      : { data: [] };
+    const profileNames = new Map(
+      profiles?.map((profile) => [profile.id, profile.full_name]) ?? [],
+    );
+
+    return sortNotes(
+      data?.map((note) => ({
+        id: note.id,
+        title: note.title,
+        body: note.body,
+        category: note.category,
+        pinned: note.pinned,
+        createdBy: note.created_by,
+        createdByName:
+          note.created_by === viewer.profile.id
+            ? viewer.profile.fullName
+            : profileNames.get(note.created_by ?? "") || "Huishoudlid",
+        createdAt: note.created_at,
+        updatedAt: note.updated_at,
+      })) ?? [],
     );
   },
 );

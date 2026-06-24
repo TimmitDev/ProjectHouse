@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   ListChecks,
+  NotebookText,
   ShoppingBasket,
   WalletCards,
 } from "lucide-react";
@@ -19,6 +20,7 @@ const icons = {
   calendar: CalendarDays,
   sparkles: ListChecks,
   shopping: ShoppingBasket,
+  notes: NotebookText,
 };
 
 export function ModuleCard({
